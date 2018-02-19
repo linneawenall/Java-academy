@@ -2,6 +2,9 @@ package com.cosylab.jwenall.academy.problem1;
 
 import java.util.Arrays;
 
+// REVIEW (high): I see you have "on", "off", "reset", "set", "get" methods defined in both classes,
+// "MyPowerSupply" and "RampedPowerSupply". Do you think it would be possible for those methods to be defined
+// only in "MyPowerSupply" ("RampedPowerSupply" would, of course, inherit them from "MyPowerSupply")?
 public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 	private boolean ramping;
 	private double[] rampValues;
@@ -79,11 +82,20 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 		} else {
 			this.msecs = msecs;
 			this.postRamping = new double[rampValues.length];
+			// you probably for got to assign
+			// REVIEW (high): it looks to me like you have an issue here. You don't assign the thread you are creating
+			// below to any variable. This means the newly-created thread will probably get desrtoyed once the
+			// "startRamp" method finishes.
+			// Also, in your case, the newly-created thread needs to get a reference to a class that implements
+			// the stuff the thread will do, in a form of a "public void run()" method.
 			new Thread(threadRamper).start();
 		}
 
 	}
 
+	// REVIEW (high): the implementation of the "run" method is correct. However, the "run" method shouldn't be
+	// implemented as a part of "RampedPowerSupply", it needs to go somehwere else... ;)
+	// Hint: read http://tutorials.jenkov.com/java-concurrency/creating-and-starting-threads.html
 	@Override
 	public void run() { 
 		for (int i = 0; i <= rampValues.length-1; i++) {
@@ -101,10 +113,12 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 		return ramping;
 	}
 
+	// REVIEW (medium): you actually don't need this method.
 	public double[] getRampValues() {
 		return rampValues;
 	}
 
+	// REVIEW (medium): you probably don't need this method.
 	public double[] getPostRamping() {
 		return postRamping;
 	}

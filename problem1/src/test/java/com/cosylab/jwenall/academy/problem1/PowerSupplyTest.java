@@ -2,11 +2,16 @@ package com.cosylab.jwenall.academy.problem1;
 
 import org.junit.Test;
 
+import static java.util.concurrent.TimeUnit.MILLISECONDS;
+import static org.awaitility.Awaitility.await;
 import static org.junit.Assert.*;
 
 import org.junit.After;
 import org.junit.Before;
 
+import java.util.concurrent.Callable;
+
+// REVIEW (high): move the RampedPowerSupply tests to a separate "RampedPowerSupplyTest" file.
 /**
  * PowerSupplyTest contains tests for PowerSupply interface.
  */
@@ -105,6 +110,7 @@ public class PowerSupplyTest {
 		}
 	}
 
+	// REVIEW (medium): you can remove this test. The "loadRamp" method is tested as a part of the "testStartRamp" test.
 	@Test
 	public void testLoadRamped() {
 		try {
@@ -118,7 +124,11 @@ public class PowerSupplyTest {
 		}
 	}
 
-	@Test
+	// REVIEW (high): this test of the "startRamp" is not correct, because it doesn't wait for the ramping to finish.
+	// The ramping runs as a separate thread, so the "startRamp" method returns immediately. As a consequence this
+	// test finishes muchearlier than the ramping itself.
+	// You can find the proper implementation below.
+	/*@Test
 	public void testStartRamp() {
 		try {
 			rps.on();
@@ -127,9 +137,40 @@ public class PowerSupplyTest {
 		} catch (IllegalStateException exception) {
 			fail("Exception while calling startramp method when power is off or it's already ramping: " + exception);
 		}
+	}*/
+
+	// REVIEW (high): your implementation of the "RampedPowerSupply" will need to pass this test.
+	@Test
+	public void testStartRamp() throws IllegalAccessException, InterruptedException {
+		// loading an array of values. double[]
+		double[] rampValues = { 10.2, 12.3, 13.5, 15.1, 18.4, 18.5, 20.5 };
+
+		// turn power supply on
+		rps.on();
+		// load ramping values
+		rps.loadRamp(rampValues);
+		// define ramping interval in msecs and start ramping
+		int msecs = 1000;
+		rps.startRamp(msecs);
+		int numRampValues = rampValues.length;
+		await().atMost(msecs * numRampValues, MILLISECONDS).until(hasRampingFinished());
+		// Thread.sleep(msecs * numRampValues);
+		assertEquals(rampValues[numRampValues - 1], rps.get(), 0.0);
 	}
 
-	@Test
+	private Callable<Boolean> hasRampingFinished() {
+		return new Callable<Boolean>() {
+			public Boolean call() throws Exception {
+				return rps.get() == 20.5;
+			}
+		};
+	}
+
+	// REVIEW (high): the "testRun" test is not valid. The "run" method should never be called explicitly. It is always
+	// called automatically by the thread it is provided to.
+	// If you look at the "testStartRamp" ramp test, the newly-created thread inside the "RampedPowerSupply" class
+	// will start executing the "run" function automatically after the "rps.startRamp(msecs);" is executed.
+	/*@Test
 	public void testRun() throws InterruptedException {
 		rps.on();
 		rps.loadRamp(rampValues);
@@ -138,7 +179,7 @@ public class PowerSupplyTest {
 		for (int i = 0; i < rps.getPostRamping().length; i++) {
 			System.out.println("PostRampCurrent: " + rps.getPostRamping()[i]);
 		}
-	}
+	}*/
 
 	/*
 	 * 2. proving that illegal operations from Requirements (2.1.) are prevented
