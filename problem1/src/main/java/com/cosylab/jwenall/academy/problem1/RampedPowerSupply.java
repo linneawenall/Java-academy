@@ -15,6 +15,7 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 		ramping = false;
 	}
 
+	// REVIEW (medium): "throws" statement missing.
 	/* Will turn the power off. */
 	public void off() {
 		if (isRamping()) {
@@ -27,6 +28,7 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 		super.off();
 	}
 
+	// REVIEW (medium): "throws" statement missing.
 	/* Will reset the power supply to 0. */
 	public void reset() {
 		if (isRamping()) {
@@ -39,6 +41,7 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 		super.reset();
 	}
 
+	// REVIEW (medium): "throws" statement missing.
 	/* Will set the current in the power supply to the given value. */
 	public void set(double value) {
 		if (!isRamping()) {
@@ -48,6 +51,7 @@ public class RampedPowerSupply extends MyPowerSupply implements Runnable {
 
 	}
 
+	// REVIEW (medium): "throws" statement missing.
 	/* Loads ramp values given as an array of double values. */
 	public void loadRamp(double[] rampValues) {
 		if (rampValues == null || rampValues.length < 1) {
