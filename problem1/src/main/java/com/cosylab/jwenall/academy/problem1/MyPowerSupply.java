@@ -2,7 +2,7 @@ package com.cosylab.jwenall.academy.problem1;
 
 public class MyPowerSupply {
 	private double current;
-	private boolean power;
+	protected boolean power;
 
 	public MyPowerSupply() {
 		this.current = 0;
@@ -10,8 +10,8 @@ public class MyPowerSupply {
 	}
 
 	// REVIEW (medium): "throws" statement missing.
-	public void on() {
-		if (!isPowerOn()) {
+	public void on() throws IllegalStateException {
+		if (!power) {
 			power = true;
 			set(0.0);
 		} else
@@ -19,16 +19,16 @@ public class MyPowerSupply {
 	}
 
 	// REVIEW (medium): "throws" statement missing.
-	public void off() {
-		if (isPowerOn()) {
+	public void off()throws IllegalStateException {
+		if (power) {
 			power = false;
 		} else
 			throw new IllegalStateException("Power is already switched OFF");
 	}
 
 	// REVIEW (medium): "throws" statement missing.
-	public void reset() {
-		if (isPowerOn()) {
+	public void reset() throws IllegalStateException {
+		if (power) {
 			current = 0.0;
 		} else
 			throw new IllegalStateException("Power is turned OFF, resetting failed.");
@@ -36,27 +36,24 @@ public class MyPowerSupply {
 	}
 
 	// REVIEW (medium): "throws" statement missing.
-	public double get() {
-		if (isPowerOn()) {
+	public double get()throws IllegalStateException {
+		if (power) {
 			return current;
 		} else
 			throw new IllegalStateException("Power is turned OFF");
 	}
 
 	// REVIEW (medium): "throws" statement missing.
-	public void set(double value) {
+	public void set(double value) throws IllegalStateException{
 		// REVIEW (medium): can you think of some additional error cases for this method?
 		// Hint: what do you think would happen if you tried to set the current to a negative vlaue?
-		if (isPowerOn()) {
+		if(value<0){
+			throw new IllegalArgumentException("Current value has to be bigger than 0");
+		}
+		if (power) {
 			current = value;
 		} else
 			throw new IllegalStateException("Couldn't set value because power is turned OFF");
-
+		
 	}
-
-	// REVIEW (minor): you probably don't need this method. Simply checking of the "power" variable is enough.
-	public boolean isPowerOn(){
-		return power;
-	}
-
 }

@@ -15,14 +15,14 @@ import java.util.concurrent.Callable;
 /**
  * PowerSupplyTest contains tests for PowerSupply interface.
  */
-public class PowerSupplyTest {
-	MyPowerSupply mps;
+public class RampedPowerSupplyTest {
+	//MyPowerSupply mps;
 	RampedPowerSupply rps;
 	double[] rampValues;
 
 	@Before
 	public void setUp() throws Exception {
-		mps = new MyPowerSupply();
+		//mps = new MyPowerSupply();
 		rps = new RampedPowerSupply();
 		rampValues = new double[10];
 		for (int i = 0; i < 10; i++) {
@@ -38,24 +38,24 @@ public class PowerSupplyTest {
 	/**
 	 * Test if the power supply can be turned on.
 	 */
-	@Test
-	public void testOn() {
-		try {
-			mps.on();
-		} catch (IllegalStateException exception) {
-			fail("Exception while turning the power supply on: " + exception);
-		}
-	}
-
-	@Test
-	public void testOff() {
-		try {
-			mps.on();
-			mps.off();
-		} catch (IllegalStateException exception) {
-			fail("Exception while turning the power supply off: " + exception);
-		}
-	}
+//	@Test
+//	public void testOn() {
+//		try {
+//			mps.on();
+//		} catch (IllegalStateException exception) {
+//			fail("Exception while turning the power supply on: " + exception);
+//		}
+//	}
+//
+//	@Test
+//	public void testOff() {
+//		try {
+//			mps.on();
+//			mps.off();
+//		} catch (IllegalStateException exception) {
+//			fail("Exception while turning the power supply off: " + exception);
+//		}
+//	}
 
 	/* 1. presenting the full functionality of the RampedPowerSupply, */
 	@Test
@@ -116,9 +116,9 @@ public class PowerSupplyTest {
 		try {
 			rps.on();
 			rps.loadRamp(rampValues);
-			for (int i = 0; i < rps.getRampValues().length; i++) {
-				System.out.println("RampValues:" + rps.getRampValues()[i]);
-			}
+//			for (int i = 0; i < rps.getRrampValues().length; i++) {
+//				System.out.println("RampValues:" + rps.getRampValues()[i]);
+//			}
 		} catch (NullPointerException exception) {
 			fail("Exception while calling loadramp method when rampValues is null: " + exception);
 		}
