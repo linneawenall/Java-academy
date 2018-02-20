@@ -22,7 +22,6 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 		super.off();
 	}
 
-	// REVIEW (medium): "throws" statement missing.
 	/* Will reset the power supply to 0. */
 	public void reset() throws IllegalStateException {
 		if (isRamping()) {
@@ -50,7 +49,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			throw new NullPointerException("The array of values is empty");
 		}
 		if (power) {
-			Arrays.sort(rampValues); // Do I want the values sorted?
+			Arrays.sort(rampValues); 
 			this.rampValues = new double[rampValues.length];
 			System.arraycopy(rampValues, 0, this.rampValues, 0, rampValues.length);
 		} else if (!power) {
@@ -89,7 +88,6 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			for (int i = 0; i <= rampValues.length - 1; i++) {
 				try {
 					set(rampValues[i]);
-					// postRamping[i] = get();
 					System.out.println(get());
 					Thread.sleep(msecs);
 

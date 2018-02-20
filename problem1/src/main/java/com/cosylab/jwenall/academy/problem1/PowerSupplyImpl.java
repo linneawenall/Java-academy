@@ -9,7 +9,6 @@ public class PowerSupplyImpl implements PowerSupply {
 		this.power = false;
 	}
 
-	// REVIEW (medium): "throws" statement missing.
 	public void on() throws IllegalStateException {
 		if (!power) {
 			power = true;
@@ -18,7 +17,6 @@ public class PowerSupplyImpl implements PowerSupply {
 			throw new IllegalStateException("Power is already switched ON");
 	}
 
-	// REVIEW (medium): "throws" statement missing.
 	public void off()throws IllegalStateException {
 		if (power) {
 			power = false;
@@ -26,7 +24,6 @@ public class PowerSupplyImpl implements PowerSupply {
 			throw new IllegalStateException("Power is already switched OFF");
 	}
 
-	// REVIEW (medium): "throws" statement missing.
 	public void reset() throws IllegalStateException {
 		if (power) {
 			current = 0.0;
@@ -35,7 +32,6 @@ public class PowerSupplyImpl implements PowerSupply {
 
 	}
 
-	// REVIEW (medium): "throws" statement missing.
 	public double get()throws IllegalStateException {
 		if (power) {
 			return current;
@@ -43,10 +39,8 @@ public class PowerSupplyImpl implements PowerSupply {
 			throw new IllegalStateException("Power is turned OFF");
 	}
 
-	// REVIEW (medium): "throws" statement missing.
-	public void set(double value) throws IllegalStateException{
-		// REVIEW (medium): can you think of some additional error cases for this method?
-		// Hint: what do you think would happen if you tried to set the current to a negative vlaue?
+
+	public void set(double value) throws IllegalStateException, IllegalArgumentException{
 		if(value<0){
 			throw new IllegalArgumentException("Current value has to be bigger than 0");
 		}
