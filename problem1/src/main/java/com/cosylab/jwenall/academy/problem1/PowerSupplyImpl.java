@@ -1,10 +1,10 @@
 package com.cosylab.jwenall.academy.problem1;
 
-public class MyPowerSupply {
+public class PowerSupplyImpl implements PowerSupply {
 	private double current;
 	protected boolean power;
 
-	public MyPowerSupply() {
+	public PowerSupplyImpl() {
 		this.current = 0;
 		this.power = false;
 	}

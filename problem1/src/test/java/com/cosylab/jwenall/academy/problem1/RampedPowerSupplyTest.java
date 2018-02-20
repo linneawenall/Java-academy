@@ -17,13 +17,13 @@ import java.util.concurrent.Callable;
  */
 public class RampedPowerSupplyTest {
 	//MyPowerSupply mps;
-	RampedPowerSupply rps;
+	RampedPowerSupplyImpl rps;
 	double[] rampValues;
 
 	@Before
 	public void setUp() throws Exception {
 		//mps = new MyPowerSupply();
-		rps = new RampedPowerSupply();
+		rps = new RampedPowerSupplyImpl();
 		rampValues = new double[10];
 		for (int i = 0; i < 10; i++) {
 			rampValues[i] = i;
