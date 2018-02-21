@@ -6,6 +6,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
@@ -14,7 +15,7 @@ import java.util.Scanner;
 /*Comparator<Number> defines the object type that overrides compare method in comparator class*/
 public class SortingAlgorithm implements Comparator<Number> {
 	private ArrayList<Number> list;
-	private int order; // might wanna change to int
+	private int order;
 	private File file;
 
 	public SortingAlgorithm() {
@@ -35,14 +36,15 @@ public class SortingAlgorithm implements Comparator<Number> {
 	 */
 	public void addNumber(String[] numbers) {
 		for (int i = 0; i < numbers.length; i++) {
-			System.out.println(numbers[i]);
 			if (i == 0) {
 				whichOrder(numbers[0]);
-				System.out.println(order);
+				System.out.println("Order: " +order);
 			}
-			if (isInteger(numbers[i])) {
+			else if (isInteger(numbers[i])) {
+				System.out.println(numbers[i]);
 				list.add(Integer.parseInt(numbers[i]));
 			} else if (isDouble(numbers[i])) {
+				System.out.println(numbers[i]);
 				list.add(Double.parseDouble(numbers[i]));
 			} else {
 				throw new IllegalArgumentException("Only numbers and the letters A and D can be read");
@@ -62,13 +64,14 @@ public class SortingAlgorithm implements Comparator<Number> {
 		}
 		String in = input.nextLine();
 		input.close();
-		String[] inArray = in.replaceAll("^:[,\\s]+", "").split("[,\\s]+");
+		String[] inArray = in.split("[,\\s]+"); //could have replaceAll("^:[,\\s]+", "") after in.
+		System.out.println(Arrays.toString(inArray));
 		readInput(inArray);
 
 	}
 
 	public void readInput(String[] input) throws FileNotFoundException {
-		if (input.length == 0) { //if empty
+		if (input.length == 0) { // if empty
 			consolInput("");
 		}
 		if (input.length == 1) { // something if its a file
@@ -78,11 +81,13 @@ public class SortingAlgorithm implements Comparator<Number> {
 		}
 	}
 
-	public int whichOrder(String sortOrder) {
+	public int whichOrder(String sortOrder) { 
+		System.out.println(sortOrder);
+		
 		if (sortOrder.equals("A:")) {
 			order = 1;
 		}
-		if (sortOrder.equals("D:")) {
+		else if (sortOrder.equals("D:")) {
 			order = -1;
 		} else {
 			order = 0;
