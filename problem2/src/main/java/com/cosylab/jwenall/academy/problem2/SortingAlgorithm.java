@@ -14,12 +14,12 @@ import java.util.Scanner;
 /*Comparator<Number> defines the object type that overrides compare method in comparator class*/
 public class SortingAlgorithm implements Comparator<Number> {
 	private ArrayList<Number> list;
-	private String order; // might wanna change to int
+	private int order; // might wanna change to int
 	private File file;
 
 	public SortingAlgorithm() {
 		list = new ArrayList<Number>();
-		this.order = "A";
+		this.order = 0;
 	}
 
 	/* Uses Collections to sort */
@@ -30,62 +30,70 @@ public class SortingAlgorithm implements Comparator<Number> {
 			throw new IllegalArgumentException("ERROR: List is empty");
 	}
 
-	/* Overrides compare method in Comparator. */
-	@Override
-	public int compare(Number n1, Number n2) {
-		if (n1.doubleValue() < n2.doubleValue()) {
-			return 1;
+	/*
+	 * @param the array of strings to add to the list
+	 */
+	public void addNumber(String[] numbers) {
+		for (int i = 0; i < numbers.length; i++) {
+			System.out.println(numbers[i]);
+			if (i == 0) {
+				whichOrder(numbers[0]);
+				System.out.println(order);
+			}
+			if (isInteger(numbers[i])) {
+				list.add(Integer.parseInt(numbers[i]));
+			} else if (isDouble(numbers[i])) {
+				list.add(Double.parseDouble(numbers[i]));
+			} else {
+				throw new IllegalArgumentException("Only numbers and the letters A and D can be read");
+			}
 		}
-		if (n1.doubleValue() > n2.doubleValue()) {
-			return -1;
-		}
-		return 0;
 	}
-	/* Reads in the file written in the console*/
 
-	public void addInput(String fileName) throws FileNotFoundException {
-		FileReader fr = new FileReader(fileName);
-		Scanner input = new Scanner(fr);
+	/* Reads in the file written in the console or from computer */
+
+	public void consolInput(String fileName) throws FileNotFoundException {
+		Scanner input;
+		if (fileName.isEmpty()) {
+			input = new Scanner(System.in);
+		} else {
+			FileReader fr = new FileReader(fileName);
+			input = new Scanner(fr);
+		}
 		String in = input.nextLine();
 		input.close();
+		String[] inArray = in.replaceAll("^:[,\\s]+", "").split("[,\\s]+");
+		readInput(inArray);
 
 	}
 
-	public void whichOrder(String order) { // tries which input from A and D
-
-	}
-
-	/*
-	 * creates a file from the input the user puts in. this makes it possible to
-	 * call the same addInput method
-	 * 
-	 */
-	public void createFile() throws IOException {
-		file = new File("Numbers");
-		PrintWriter output = new PrintWriter(file);
-		int ch;
-		while ((ch = System.in.read()) != '\n') {
-			output.println((char) ch);
+	public void readInput(String[] input) throws FileNotFoundException {
+		if (input.length == 0) { //if empty
+			consolInput("");
 		}
-		output.close();
+		if (input.length == 1) { // something if its a file
+			consolInput(input[0]);
+		} else {
+			addNumber(input);
+		}
+	}
+
+	public int whichOrder(String sortOrder) {
+		if (sortOrder.equals("A:")) {
+			order = 1;
+		}
+		if (sortOrder.equals("D:")) {
+			order = -1;
+		} else {
+			order = 0;
+		}
+		return order;
 	}
 
 	public boolean isInteger(String number) {
 		try {
-			Integer.parseInt(
-					number);/*
-							 * Returns a new int initialized to the value
-							 * represented by the specified String, as performed
-							 * by the valueOf method of class Double.
-							 */
-		} catch (NumberFormatException e) { /*
-											 * Thrown to indicate that the
-											 * application has attempted to
-											 * convert a string to one of the
-											 * numeric types, but that the
-											 * string does not have the
-											 * appropriate format.
-											 */
+			Integer.parseInt(number);
+		} catch (NumberFormatException e) {
 			return false;
 		}
 		return true;
@@ -93,22 +101,40 @@ public class SortingAlgorithm implements Comparator<Number> {
 
 	public boolean isDouble(String number) {
 		try {
-			Double.parseDouble(
-					number);/*
-							 * Returns a new double initialized to the value
-							 * represented by the specified String, as performed
-							 * by the valueOf method of class Double.
-							 */
-		} catch (NumberFormatException e) { /*
-											 * Thrown to indicate that the
-											 * application has attempted to
-											 * convert a string to one of the
-											 * numeric types, but that the
-											 * string does not have the
-											 * appropriate format.
-											 */
+			Double.parseDouble(number);
+		} catch (NumberFormatException e) {
 			return false;
 		}
 		return true;
 	}
+
+	/* Overrides compare method in Comparator. */
+	@Override
+	public int compare(Number n1, Number n2) {
+		if (n1.doubleValue() < n2.doubleValue()) {
+			return order * -1;
+		}
+		if (n1.doubleValue() > n2.doubleValue()) {
+			return order * 1;
+		}
+		return 0;
+	}
+
+	public void printList() {
+		int listLength = list.size();
+		if (order == 1)
+			System.out.print("Ascending: ");
+		else if (order == -1)
+			System.out.print("Descending: ");
+		else
+			System.out.print("Unsorted: ");
+
+		for (int i = 0; i < listLength; i++) {
+			System.out.print(list.get(i));
+			if (i != listLength - 1)
+				System.out.print(", ");
+		}
+		System.out.println();
+	}
+
 }
