@@ -6,6 +6,7 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.util.Scanner;
 
+// REVIEW (low): you can probably remove this file. It's not used anywhere, right?
 public class NumberFile {
 
 	public static void main(String[] args) {

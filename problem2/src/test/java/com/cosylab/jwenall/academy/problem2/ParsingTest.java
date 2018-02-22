@@ -2,8 +2,6 @@ package com.cosylab.jwenall.academy.problem2;
 
 import org.junit.Test;
 
-import com.cosylab.jwenall.academy.problem1.RampedPowerSupplyImpl;
-
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 

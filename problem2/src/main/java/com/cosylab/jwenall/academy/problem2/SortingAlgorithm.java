@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Scanner;
 
 /*Comparator<Number> defines the object type that overrides compare method in comparator class*/
+// REVIEW (low): you probably don't need this class anymore, right?
 public class SortingAlgorithm implements Comparator<Number> {
 	private ArrayList<Number> list;
 	private int order;

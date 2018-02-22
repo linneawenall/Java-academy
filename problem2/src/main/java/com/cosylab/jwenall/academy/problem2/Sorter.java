@@ -10,6 +10,10 @@ public class Sorter implements Comparator<Number> { // Main class will manage
 	private int order;
 	private ArrayList<Number> list;
 
+	// REVIEW (medium): rather than having the input in the constructor, it would be better to define a "sort" method
+	// and pass the numbers and sort order as its arguments. The sort method would then sort the numbers and return
+	// a sorted array as a result.
+	// REVIEW (medium): also you should get here the array of Number objects, not array of strings
 	public Sorter(int order, String[] input) { // takes the output from Parsing
 												// class. Optional: input class
 		list = new ArrayList<Number>();
@@ -23,11 +27,13 @@ public class Sorter implements Comparator<Number> { // Main class will manage
 	public void sortList() throws IllegalArgumentException {
 		if (!list.isEmpty()) {
 			Collections.sort(list, this);
+
 			printList();
 		} else
 			throw new IllegalArgumentException("ERROR: List is empty");
 	}
 
+	// REVIEW (medium): this method should be a part of the "Parsing" class, not "Sorter".
 	public void addNumber(String[] numbers)throws IllegalArgumentException, NullPointerException {
 		if(numbers == null){
 			throw new NullPointerException("ERROR: String array is null");
@@ -57,6 +63,7 @@ public class Sorter implements Comparator<Number> { // Main class will manage
 		return 0;
 	}
 
+	// REVIEW (medium): this method should be a part of the "Parsing" class, not "Sorter".
 	public boolean isInteger(String number)throws NumberFormatException {
 		try {
 			Integer.parseInt(number);
@@ -66,6 +73,7 @@ public class Sorter implements Comparator<Number> { // Main class will manage
 		return true;
 	}
 
+	// REVIEW (medium): this method should be a part of the "Parsing" class, not "Sorter".
 	public boolean isDouble(String number) throws NumberFormatException{
 		try {
 			Double.parseDouble(number);
@@ -75,6 +83,9 @@ public class Sorter implements Comparator<Number> { // Main class will manage
 		return true;
 	}
 
+	// REVIEW (medium): this method probably shouldn't be a part of the "Sorter" class. The sorter is only concerned
+	// with the sorting of the numbers, the actual printing should probably be done elsewhere (can you perhaps
+	// think of a proper place where you could move the printing? ;) ).
 	public void printList() { //this is just for visualising the printout
 		int listLength = list.size();
 		if (order == 1)
