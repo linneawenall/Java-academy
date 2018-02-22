@@ -27,7 +27,11 @@ public class Parsing { // will create the String []number and int order
 		Scanner input;
 		if (fileName.isEmpty()) {
 			input = new Scanner(System.in);
+		} else if (!fileName.isEmpty()) {
+			input = new Scanner(fileName);
+			//Here I need something that reads whats in the string
 		} else {
+			System.out.println("else in consolInput");
 			FileReader fr = new FileReader(fileName);
 			input = new Scanner(fr);
 		}
@@ -58,8 +62,8 @@ public class Parsing { // will create the String []number and int order
 	public int getOrder() {
 		return order;
 	}
-	
-	public String getString(){ //Only really need this one in ParsingTest
+
+	public String getString() { // Only really need this one in ParsingTest
 		return number;
 	}
 
