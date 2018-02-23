@@ -1,6 +1,5 @@
 package com.cosylab.jwenall.academy.problem2;
 
-import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Comparator;
@@ -18,6 +17,7 @@ public class Sorter implements Comparator<Number> {
 		this.input = input;
 		this.order = order;
 		sortList();
+		System.out.println("Sorting done: " + input.toString());
 		return input;
 	}
 
@@ -39,10 +39,6 @@ public class Sorter implements Comparator<Number> {
 			return order * 1;
 		}
 		return 0;
-	}
-	/*Only used in class SorterTest to test Sorter class*/
-	public ArrayList<Number> getSortedList(){
-		return input;
 	}
 
 }

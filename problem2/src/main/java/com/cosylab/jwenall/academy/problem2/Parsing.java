@@ -1,18 +1,15 @@
 package com.cosylab.jwenall.academy.problem2;
 
-import java.io.FileNotFoundException;
-import java.io.FileReader;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Scanner;
 
 public class Parsing {
 	private int order;
 	private ArrayList<Number> list;
 	private String input;
-	String [] inArray;
+	String[] inArray;
 
-	public Parsing(String input) throws FileNotFoundException {
+	public Parsing(String input) {
 		this.input = input;
 		list = new ArrayList<Number>();
 		System.out.println("Parsing object created");
@@ -27,7 +24,7 @@ public class Parsing {
 
 	}
 
-	public int whichOrder(String sortOrder) {
+	private int whichOrder(String sortOrder) {
 		System.out.println("Executing sortOrder method for string: " + sortOrder);
 		if (sortOrder.equals("A:")) {
 			order = 1;
@@ -40,7 +37,7 @@ public class Parsing {
 		return order;
 	}
 
-	public void addNumbers(String[] inputs) throws IllegalArgumentException, NullPointerException {
+	private void addNumbers(String[] inputs) throws IllegalArgumentException, NullPointerException {
 		inArray = inputs;
 		System.out.println("String [] inputs to addNumber: " + Arrays.toString(inputs));
 		if (inputs == null) {
@@ -62,7 +59,7 @@ public class Parsing {
 		}
 	}
 
-	public boolean isInteger(String number) throws NumberFormatException {
+	private boolean isInteger(String number) throws NumberFormatException {
 		try {
 			Integer.parseInt(number);
 		} catch (NumberFormatException e) {
@@ -71,7 +68,7 @@ public class Parsing {
 		return true;
 	}
 
-	public boolean isDouble(String number) throws NumberFormatException {
+	private boolean isDouble(String number) throws NumberFormatException {
 		try {
 			Double.parseDouble(number);
 		} catch (NumberFormatException e) {
@@ -86,10 +83,6 @@ public class Parsing {
 
 	public int getOrder() {
 		return order;
-	}
-	
-	public String[] getStringArray(){
-		return inArray;
 	}
 
 }

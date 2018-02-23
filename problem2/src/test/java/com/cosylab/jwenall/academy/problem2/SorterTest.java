@@ -5,7 +5,7 @@ import org.junit.Test;
 import static org.junit.Assert.assertTrue;
 import static org.junit.Assert.fail;
 
-import java.util.ArrayList;
+
 
 import org.junit.After;
 import org.junit.Before;
@@ -30,10 +30,10 @@ public class SorterTest {
 	@Test
 	public void testSort(){
 		s.sort(p.getOrder(), p.getList());
-		double twoPointFive = (double) s.getSortedList().get(2);
+		double twoPointFive = (double) s.sort(p.getOrder(), p.getList()).get(2);
 		System.out.println(twoPointFive);
-		System.out.println("sorted list: " +s.getSortedList().toString() );
-		assertTrue("Number at third index is 2.5",(double) s.getSortedList().get(2)==2.5 );
+		System.out.println("sorted list: " +s.sort(p.getOrder(), p.getList()).toString() );
+		assertTrue("Number at third index is 2.5",(double) s.sort(p.getOrder(), p.getList()).get(2)==2.5 );
 		
 	}
 
