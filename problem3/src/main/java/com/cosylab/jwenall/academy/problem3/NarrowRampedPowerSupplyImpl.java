@@ -1,38 +1,45 @@
 package com.cosylab.jwenall.academy.problem3;
 
 public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implements DeviceNarrow {
-	
-	public NarrowRampedPowerSupplyImpl(RampedPowerSupplyImpl rps){
-		super(ps);//needs fixing
+	protected RampedPowerSupplyImpl rps;
+
+	public NarrowRampedPowerSupplyImpl(RampedPowerSupplyImpl rps) {
+		super(rps);// this is probably not right as rps might be null
+		rps = new RampedPowerSupplyImpl();
+		this.rps = rps;
 	}
 
 	@Override
 	public Object execute(String command, Object[] params) {
 		switch (command) {
 		case "on":
-			ps.on();
+			rps.on();
 			return true;
 		case "off":
-			ps.off();
+			rps.off();
 			return true;
 		case "reset":
-			ps.reset();
+			rps.reset();
 			return true;
 		case "get":
-			return ps.get();
+			return rps.get();
 		case "set": // needs exception if params[0] doesn't contain double
 			if ((Double) params[0] == 0.0) {
-				ps.off();
+				rps.off();
 			} else {
-				ps.set((Double) params[0]);
+				rps.set((Double) params[0]);
 			}
+			return true;
+		case "loadRamp":
+			rps.loadRamp((double[]) params[0]);
+			return true;
+		case "startRamp":
+			rps.startRamp((int) params[0]);
 			return true;
 		default:
 			throw new IllegalArgumentException("There is no such command for this device");
 		}
 
 	}
-
-
 
 }
