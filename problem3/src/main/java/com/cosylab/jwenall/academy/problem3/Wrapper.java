@@ -48,7 +48,7 @@ public class Wrapper implements DeviceNarrow {
 			if (params.getClass().getName().equals("NarrowPowerSupplyImpl")) {
 				nps.execute(command, params);
 			} else {
-				nps.execute(command, params);
+				rnps.execute(command, params);
 			}
 		} else if (command.equalsIgnoreCase("loadRamp") || command.equalsIgnoreCase("startRamp")) {
 			rnps.execute(command, params);

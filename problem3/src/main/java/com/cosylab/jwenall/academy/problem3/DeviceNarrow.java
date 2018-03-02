@@ -8,6 +8,6 @@ import com.cosylab.jwenall.academy.problem1.PowerSupply;
 public interface DeviceNarrow {
 
 
-	public boolean execute (String command, Object [] params);
+	public Object execute (String command, Object [] params);
 	
 }

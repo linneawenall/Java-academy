@@ -1,21 +1,37 @@
 package com.cosylab.jwenall.academy.problem3;
 
-
-public class NarrowPowerSupplyImpl extends PowerSupplyImpl implements DeviceNarrow {
-
-//	public NarrowPowerSupplyImpl(com.cosylab.jwenall.academy.problem1.PowerSupplyImpl ps){
-//		super();
-//	}
-
+public class NarrowPowerSupplyImpl implements DeviceNarrow {
+	protected PowerSupplyImpl ps;
 
 	public NarrowPowerSupplyImpl(PowerSupplyImpl ps) {
-		// TODO Auto-generated constructor stub
+		ps = new PowerSupplyImpl();
+		this.ps = ps;
 	}
 
 	@Override
-	public boolean execute(String command, Object[] params) {
-		// TODO Auto-generated method stub
-		return false;
-	}
+	public Object execute(String command, Object[] params) {
+		switch (command) {
+		case "on":
+			ps.on();
+			return true;
+		case "off":
+			ps.off();
+			return true;
+		case "reset":
+			ps.reset();
+			return true;
+		case "get":
+			return ps.get();
+		case "set": // needs exception if params[0] doesn't contain double
+			if ((Double) params[0] == 0.0) {
+				ps.off();
+			} else {
+				ps.set((Double) params[0]);
+			}
+			return true;
+		default:
+			throw new IllegalArgumentException("There is no such command for this device");
+		}
 
+	}
 }
