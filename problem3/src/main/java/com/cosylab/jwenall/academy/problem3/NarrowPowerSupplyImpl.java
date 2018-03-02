@@ -4,6 +4,7 @@ public class NarrowPowerSupplyImpl implements DeviceNarrow {
 	protected PowerSupplyImpl ps;
 
 	public NarrowPowerSupplyImpl(PowerSupplyImpl ps) {
+		// REVIEW (high): you should remove the line below. This one will override the "ps" that you are passing via argument.
 		ps = new PowerSupplyImpl();
 		this.ps = ps;
 	}

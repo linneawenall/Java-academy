@@ -4,7 +4,9 @@ public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implement
 	protected RampedPowerSupplyImpl rps;
 
 	public NarrowRampedPowerSupplyImpl(RampedPowerSupplyImpl rps) {
+		// REVIEW (medium): you actually don't need to call the super constructor, so the code below can be rmeoved.
 		super(rps);// this is probably not right as rps might be null
+		// REVIEW (high): you should remove the line below. This one will override the "rps" that you are passing via argument.
 		rps = new RampedPowerSupplyImpl();
 		this.rps = rps;
 	}
@@ -31,6 +33,8 @@ public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implement
 			}
 			return true;
 		case "loadRamp":
+			// REVIEW (high): here you are currently only passing the first ramp element to "rps.loadRamp". You need
+			// to pass all the ramp values to "rps.loadRamp".
 			rps.loadRamp((double[]) params[0]);
 			return true;
 		case "startRamp":

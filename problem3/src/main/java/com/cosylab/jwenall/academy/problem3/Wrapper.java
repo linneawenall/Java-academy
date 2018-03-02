@@ -1,11 +1,15 @@
 package com.cosylab.jwenall.academy.problem3;
 
+// REVIEW (high): you really don't need this wrapper class. "NarrowPowerSupplyImpl" and "NarrowRampedPowerSupplyImpl"
+// are practically finished (only a couple review comments left). Whe you need to do now is finish the "Circuit" class
+// and problem3 will be solved. The "wrappers" the instructions is talking about are actually the implementations of the
+// narrows you already implemented.
+
+
 /* 1. Wrapper should be a class with a constructor receiving
  *its device instance as construction parameter. 
  *The wrapper's interface is the desired 'narrow' one
- * 2. The method invocation of the wrapped device is done by
- * the command parser that is a part of the wrapper. QUESTION: What is the command parser?
- * 4. Design the wrappers in such a way that would ease 
+ * 4. Design the wrappers in such a way that would ease
  * adding more devices to the collection, as there is 
  * a variety of devices that real-world circuits are 
  * made of, as illustrated by the Figure 1.*/
