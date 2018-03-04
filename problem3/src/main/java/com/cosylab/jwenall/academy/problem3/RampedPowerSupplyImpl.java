@@ -25,7 +25,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 	/* Will reset the power supply to 0. */
 	public void reset() throws IllegalStateException {
 		if (isRamping()) {
-			if (isRamping()) {
+		{
 				throw new IllegalStateException("PowerSupply is ramping, can't turn OFF");
 			}
 		}
@@ -52,6 +52,9 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			Arrays.sort(rampValues); 
 			this.rampValues = new double[rampValues.length];
 			System.arraycopy(rampValues, 0, this.rampValues, 0, rampValues.length);
+			for (int i = 0; i <= rampValues.length - 1; i++) {
+				System.out.println("RampValue at index: " + i + ": "+rampValues[i]);
+			}
 		} else if (!power) {
 			throw new IllegalStateException("Can not load ramp values, power is OFF");
 		}
@@ -87,8 +90,8 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			System.out.println("Ramper is running");
 			for (int i = 0; i <= rampValues.length - 1; i++) {
 				try {
+					System.out.println("Loop number: "+i); //Here it only loops the first time. Why?
 					set(rampValues[i]);
-					System.out.println(get());
 					Thread.sleep(msecs);
 
 				} catch (InterruptedException e) {

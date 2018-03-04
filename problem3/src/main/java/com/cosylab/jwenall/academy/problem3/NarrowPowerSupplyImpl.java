@@ -1,11 +1,9 @@
 package com.cosylab.jwenall.academy.problem3;
 
-public class NarrowPowerSupplyImpl implements DeviceNarrow {
+public class NarrowPowerSupplyImpl implements DeviceNarrow {//is a wrapper cuz wraps around PowerSupplyImpl
 	protected PowerSupplyImpl ps;
 
 	public NarrowPowerSupplyImpl(PowerSupplyImpl ps) {
-		// REVIEW (high): you should remove the line below. This one will override the "ps" that you are passing via argument.
-		ps = new PowerSupplyImpl();
 		this.ps = ps;
 	}
 
@@ -21,9 +19,9 @@ public class NarrowPowerSupplyImpl implements DeviceNarrow {
 		case "reset":
 			ps.reset();
 			return true;
-		case "get":
+		case "current_get":
 			return ps.get();
-		case "set": // needs exception if params[0] doesn't contain double
+		case "current_set": // needs exception if params[0] doesn't contain double
 			if ((Double) params[0] == 0.0) {
 				ps.off();
 			} else {
