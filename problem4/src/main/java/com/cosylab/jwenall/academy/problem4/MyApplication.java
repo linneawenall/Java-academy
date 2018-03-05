@@ -12,6 +12,8 @@ import javax.swing.SwingUtilities;
 // REVIEW (high): because of this import, I'm getting compile-time errors.
 // Fix it to "import com.cosylab.jwenall.academy.problem4.NarrowRampedPowerSupplyImpl".
 // Also copy the necessary files from problem4 to problem5.
+// REVIEW (high): many controls are (labels, button, ...) are missing. Take a look at the image in the description
+// of the exercise 4.
 import com.cosylab.jwenall.academy.problem3.NarrowRampedPowerSupplyImpl;
 
 public class MyApplication extends JFrame {
