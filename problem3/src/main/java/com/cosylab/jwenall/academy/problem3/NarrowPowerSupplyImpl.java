@@ -21,7 +21,7 @@ public class NarrowPowerSupplyImpl implements DeviceNarrow {//is a wrapper cuz w
 			return true;
 		case "current_get":
 			return ps.get();
-		case "current_set": // needs exception if params[0] doesn't contain double
+		case "current_set": 
 			if ((Double) params[0] == 0.0) {
 				ps.off();
 			} else {
