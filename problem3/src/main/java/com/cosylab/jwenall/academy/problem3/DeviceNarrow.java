@@ -1,5 +1,7 @@
 package com.cosylab.jwenall.academy.problem3;
 
+// REVIEW (high): remove the import below since it's a source of compile-time errors. Also, the import is not needed
+// anywhere in this file.
 import com.cosylab.jwenall.academy.problem1.PowerSupply;
 
 /* Construct the commands of the 'narrow' interface 

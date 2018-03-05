@@ -9,6 +9,9 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
 
+// REVIEW (high): because of this import, I'm getting compile-time errors.
+// Fix it to "import com.cosylab.jwenall.academy.problem4.NarrowRampedPowerSupplyImpl".
+// Also copy the necessary files from problem4 to problem5.
 import com.cosylab.jwenall.academy.problem3.NarrowRampedPowerSupplyImpl;
 
 public class MyApplication extends JFrame {
