@@ -1,4 +1,8 @@
 .idea
 *.iml
+.metadata
+.settings
+.classpath
+.project
 /bin/
 target
