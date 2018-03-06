@@ -1,7 +1,5 @@
 package com.cosylab.jwenall.academy.problem1;
 
-// REVIEW (high): currently the code doesn't compile for me because "PowerSupply" interface is missing.
-// Did you perhaps forget to commit it?
 public class PowerSupplyImpl implements PowerSupply {
 	private double current;
 	protected boolean power;

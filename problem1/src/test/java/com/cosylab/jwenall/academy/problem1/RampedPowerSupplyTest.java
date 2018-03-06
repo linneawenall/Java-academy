@@ -92,7 +92,6 @@ public class RampedPowerSupplyTest {
 	}
 
 
-	// REVIEW (high): your implementation of the "RampedPowerSupply" will need to pass this test.
 	@Test
 	public void testStartRamp() throws IllegalAccessException, InterruptedException {
 		// loading an array of values. double[]
