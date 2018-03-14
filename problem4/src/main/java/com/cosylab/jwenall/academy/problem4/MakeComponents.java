@@ -30,8 +30,8 @@ public class MakeComponents {
 
 	public MakeComponents(JPanel panel) throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
-		deviceIcon = createImageIcon("/res/red.png", "Red dot");
-		rampIcon = createImageIcon("/res/red.png", "Red dot");
+		deviceIcon = createImageIcon("/red.png", "Red dot");
+		rampIcon = createImageIcon("/red.png", "Red dot");
 		placeComponents(panel);
 	}
 
@@ -289,8 +289,8 @@ public class MakeComponents {
 	}
 
 	private ImageIcon whichIcon(String command) {
-		ImageIcon red = createImageIcon("/res/red.png", "Red dot");
-		ImageIcon green = createImageIcon("/res/green.png", "Green dot");
+		ImageIcon red = createImageIcon("/red.png", "Red dot");
+		ImageIcon green = createImageIcon("/green.png", "Green dot");
 		if (command.equals("on") || command.equals("startRamp")) {
 			return green;
 		}
