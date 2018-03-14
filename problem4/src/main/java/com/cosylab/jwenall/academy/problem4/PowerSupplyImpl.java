@@ -1,6 +1,6 @@
 package com.cosylab.jwenall.academy.problem4;
 
-// Did you perhaps forget to commit it?
+
 public class PowerSupplyImpl implements PowerSupply {
 	private double current;
 	protected boolean power;
