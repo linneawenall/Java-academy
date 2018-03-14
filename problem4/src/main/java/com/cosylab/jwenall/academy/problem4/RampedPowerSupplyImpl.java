@@ -2,6 +2,7 @@ package com.cosylab.jwenall.academy.problem4;
 
 import java.util.Arrays;
 
+// REVIEW (high): you are getting compilation errors here (you are missing PowerSupplyImpl file).
 public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowerSupply {
 	private boolean ramping;
 	protected double[] rampValues;
