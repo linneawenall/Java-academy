@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
+import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -27,6 +28,7 @@ public class MakeComponents {
 	private String[] array;
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
+	private Thread currentThread;
 
 	public MakeComponents(JPanel panel) throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
@@ -92,9 +94,14 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				device.execute("on", new Object[] {});
-				deviceLabel.setIcon(whichIcon("on"));
-				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+				try {
+					device.execute("on", new Object[] {});
+					deviceLabel.setIcon(whichIcon("on"));
+					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+				} catch (IllegalStateException e3) {
+					logArea.append("Error: Device is already on. \n");
+				}
+
 			}
 
 		});
@@ -111,11 +118,17 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				device.execute("off", new Object[] {});
-				deviceLabel.setIcon(whichIcon("off"));
-				currentLabel.setText("");
+					try {
 
-			}
+						device.execute("off", new Object[] {});
+						deviceLabel.setIcon(whichIcon("off"));
+						currentLabel.setText("");
+					} catch (IllegalStateException e2) {
+						logArea.append("Error: Device is already turned off.\n");
+					}
+
+				
+	}
 
 		});
 		return offButton;
@@ -131,8 +144,14 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				device.execute("reset", new Object[] {});
-				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+
+				try {
+					device.execute("reset", new Object[] {});
+					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+					logArea.append("Current reset to: " + currentLabel.getText() + "\n");
+				} catch (IllegalStateException e1) {
+					logArea.append("Error: Device is turned off, can´t reset value.\n");
+				}
 			}
 
 		});
@@ -171,8 +190,13 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				device.execute("current_set", new Object[] { Double.parseDouble(setText.getText()) });
-				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+				try {
+					device.execute("current_set", new Object[] { Double.parseDouble(setText.getText()) });
+					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+					logArea.append("Current set to: " + setText.getText() + "\n");
+				} catch (IllegalStateException e1) {
+					logArea.append("Error: Device is turned off, can´t set value.\n");
+				}
 
 			}
 
@@ -200,6 +224,7 @@ public class MakeComponents {
 				for (int i = 0; i < rampValues.length; i++) {
 					rampValues[i] = Double.parseDouble(array[i]);
 				}
+				logArea.append("Ramping values loaded: " + Arrays.toString(array) + "\n");
 				device.execute("loadRamp", rampValues);
 			}
 		});
@@ -223,6 +248,7 @@ public class MakeComponents {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				msecs = Integer.parseInt(timeText.getText());
+				logArea.append("Ramping time set to: " + msecs + " msecs \n");
 			}
 
 		});
@@ -254,10 +280,12 @@ public class MakeComponents {
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
-				rampStatusLabel.setIcon(whichIcon("startRamp"));
-				Thread currentThread = new Thread() {
+				// rampStatusLabel.setIcon(whichIcon("startRamp"));
+				logArea.append("Ramping started \n");
+				currentThread = new Thread() {
 					public void run() {
 						runCurrent();
+
 					}
 				};
 				currentThread.start();
@@ -268,9 +296,9 @@ public class MakeComponents {
 	}
 
 	public JTextArea makeLogArea() {
-		logArea = new JTextArea("Log Screen");
+		logArea = new JTextArea("");
 		logArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		logArea.setFont(logArea.getFont().deriveFont(24.0f));
+		// logArea.setFont(logArea.getFont().deriveFont(24.0f));
 		logArea.setBackground(Color.WHITE);
 		logArea.setBounds(10, 320, 230, 130);
 		return logArea;
@@ -291,7 +319,7 @@ public class MakeComponents {
 	private ImageIcon whichIcon(String command) {
 		ImageIcon red = createImageIcon("/res/red.png", "Red dot");
 		ImageIcon green = createImageIcon("/res/green.png", "Green dot");
-		if (command.equals("on") || command.equals("startRamp")) {
+		if (command.equals("on") || currentThread.isAlive()) {
 			return green;
 		}
 		return red;
@@ -299,6 +327,7 @@ public class MakeComponents {
 
 	// Called from non-UI thread
 	private void runCurrent() {
+		rampStatusLabel.setIcon(whichIcon("startRamp"));
 		(new CurrentValueFinder()).execute();
 	}
 
@@ -307,9 +336,13 @@ public class MakeComponents {
 		protected Void doInBackground() throws Exception {
 			for (int i = 0; i <= array.length; i++) {
 				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+				if (currentThread.isInterrupted()) {
+					rampStatusLabel.setIcon(whichIcon("off"));
+				}
 				Thread.sleep(msecs);
 				if (i == array.length - 1) {
 					rampStatusLabel.setIcon(whichIcon("off"));
+					logArea.append("Ramping completed \n");
 				}
 			}
 
