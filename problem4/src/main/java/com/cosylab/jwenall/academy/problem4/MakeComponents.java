@@ -5,6 +5,7 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
+import java.util.IllegalFormatException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -57,24 +58,6 @@ public class MakeComponents {
 		panel.add(makeRampStatusLabel());
 		panel.add(makeLogArea());
 
-		//
-		// deviceLabel = makeDeviceLabel();
-		// onButton = makeOnButton();
-		// offButton = makeOffButton();
-		// resetButton = makeResetButton();
-		// startButton = makeStartButton();
-		// descriptionLabel = makeDescriptionLabel();
-		// currentLabel = makeCurrentLabel();
-		// setLabel = makeSetLabel();
-		// setField = makeSetField();
-		// rampLabel = makeRampLabel();
-		// rampField = makeRampField();
-		// timeLabel = makeTimeLabel();
-		// timeField = makeTimeField();
-		// startLabel = makeStartLabel();
-		// rampStatusLabel = makeRampStatusLabel();
-		// logArea = makeLogArea();
-
 	}
 
 	public JLabel makeDeviceLabel() {
@@ -118,17 +101,16 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-					try {
+				try {
 
-						device.execute("off", new Object[] {});
-						deviceLabel.setIcon(whichIcon("off"));
-						currentLabel.setText("");
-					} catch (IllegalStateException e2) {
-						logArea.append("Error: Device is already turned off.\n");
-					}
+					device.execute("off", new Object[] {});
+					deviceLabel.setIcon(whichIcon("off"));
+					currentLabel.setText("");
+				} catch (IllegalStateException e2) {
+					logArea.append("Error: Device is already turned off.\n");
+				}
 
-				
-	}
+			}
 
 		});
 		return offButton;
@@ -190,14 +172,20 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				try {
-					device.execute("current_set", new Object[] { Double.parseDouble(setText.getText()) });
-					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
-					logArea.append("Current set to: " + setText.getText() + "\n");
-				} catch (IllegalStateException e1) {
-					logArea.append("Error: Device is turned off, can´t set value.\n");
-				}
+				if (isDouble(setText.getText())) {
+					try {
+						device.execute("current_set", new Object[] { Double.parseDouble(setText.getText()) });
+						currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
+						logArea.append(
+								"Current set to: " + device.execute("current_get", new Object[] {}).toString() + "\n");
+					} catch (IllegalStateException e1) {
+						logArea.append("Error: Device is turned off, can´t set value.\n");
+					}
+				} else {
+					logArea.append("Error: Only numbers accepted \n");
 
+
+				}
 			}
 
 		});
@@ -221,11 +209,21 @@ public class MakeComponents {
 			public void actionPerformed(ActionEvent e) {
 				array = rampText.getText().split("[,\\s]+");
 				Object[] rampValues = new Object[array.length];
-				for (int i = 0; i < rampValues.length; i++) {
-					rampValues[i] = Double.parseDouble(array[i]);
+				if (isAllDouble(array)) {
+					for (int i = 0; i < rampValues.length; i++) {
+						rampValues[i] = Double.parseDouble(array[i]);
+					}
+					try {
+						device.execute("loadRamp", rampValues);
+					} catch (IllegalStateException e2) {
+						logArea.append("Error: Only possible to load ramp when ON.");
+					}
+				} else {
+					logArea.append("Error: Only numbers can be put in\n");
 				}
-				logArea.append("Ramping values loaded: " + Arrays.toString(array) + "\n");
-				device.execute("loadRamp", rampValues);
+				if (isAllDouble(array)) {
+					logArea.append("Ramping values loaded: " + Arrays.toString(rampValues) + "\n");
+				}
 			}
 		});
 		return rampText;
@@ -247,11 +245,18 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				msecs = Integer.parseInt(timeText.getText());
-				logArea.append("Ramping time set to: " + msecs + " msecs \n");
-			}
+				
+				if (isInteger(timeText.getText())) {
+						msecs = Integer.parseInt(timeText.getText());
+						logArea.append("Ramping time set to: " + msecs + " msecs \n"); //should only happen when on though
+					
+				} else {
+					logArea.append("Error: Only one number accepted \n");
+				}
+				
 
-		});
+
+		}});
 		return timeText;
 
 	}
@@ -280,7 +285,6 @@ public class MakeComponents {
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
-				// rampStatusLabel.setIcon(whichIcon("startRamp"));
 				logArea.append("Ramping started \n");
 				currentThread = new Thread() {
 					public void run() {
@@ -298,7 +302,6 @@ public class MakeComponents {
 	public JTextArea makeLogArea() {
 		logArea = new JTextArea("");
 		logArea.setBorder(BorderFactory.createLineBorder(Color.BLACK));
-		// logArea.setFont(logArea.getFont().deriveFont(24.0f));
 		logArea.setBackground(Color.WHITE);
 		logArea.setBounds(10, 320, 230, 130);
 		return logArea;
@@ -319,7 +322,7 @@ public class MakeComponents {
 	private ImageIcon whichIcon(String command) {
 		ImageIcon red = createImageIcon("/red.png", "Red dot");
 		ImageIcon green = createImageIcon("/green.png", "Green dot");
-		if (command.equals("on") || currentThread.isAlive()) {
+		if (command.equals("on") || command.equals("startRamp")) {
 			return green;
 		}
 		return red;
@@ -350,20 +353,31 @@ public class MakeComponents {
 		}
 	};
 
-	// private class CurrentOperation extends SwingWorker<Void, Void>{
-	// @Override
-	// protected Void doInBackground() throws Exception {
-	// for (int i = 0; i <= array.length; i++) {
-	// currentLabel.setText(device.execute("current_get", new Object[]
-	// {}).toString());
-	// Thread.sleep(msecs);
-	// if(i == array.length - 1){
-	// rampStatusLabel.setIcon(whichIcon("off"));
-	// }
-	// }
-	//
-	// return null;
-	// }
-	// };
+	private boolean isDouble(String number) throws NumberFormatException {
+		try {
+			Double.parseDouble(number);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
 
+	private boolean isAllDouble(String[] array) {
+		for (int i = 0; i < array.length; i++) {
+			if (!isDouble(array[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+	
+	private boolean isInteger(String number) throws NumberFormatException {
+		try {
+			Integer.parseInt(number);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+	
 }
