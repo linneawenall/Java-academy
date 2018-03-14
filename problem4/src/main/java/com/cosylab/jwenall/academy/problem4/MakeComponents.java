@@ -1,7 +1,6 @@
 package com.cosylab.jwenall.academy.problem4;
 
 import java.awt.Color;
-import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
@@ -95,7 +94,7 @@ public class MakeComponents {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("on", new Object[] {});
 				deviceLabel.setIcon(whichIcon("on"));
-				// setCurrentArea("on");
+				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 			}
 
 		});
@@ -114,7 +113,7 @@ public class MakeComponents {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("off", new Object[] {});
 				deviceLabel.setIcon(whichIcon("off"));
-				// setCurrentArea("off");
+				currentLabel.setText("");
 
 			}
 
@@ -133,7 +132,7 @@ public class MakeComponents {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				device.execute("reset", new Object[] {});
-				// setCurrentArea("reset");
+				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 			}
 
 		});
@@ -173,7 +172,7 @@ public class MakeComponents {
 			@Override
 			public void actionPerformed(ActionEvent e) {
 				device.execute("current_set", new Object[] { Double.parseDouble(setText.getText()) });
-				// setCurrentArea("current_set");
+				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 
 			}
 
@@ -251,18 +250,11 @@ public class MakeComponents {
 		startButton.setBackground(Color.decode("#999999"));
 		startButton.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		startButton.setBounds(10, 260, 120, 25);
-		// startButton.addActionListener(new ActionListener() {
-		// @Override
-		// public void actionPerformed(ActionEvent e) {
-		// device.execute("startRamp", new Object[] { msecs });
-		// // setCurrentArea("startRamp");
-		// rampStatusLabel.setIcon(whichIcon("startRamp"));
-		// }
-		// });
 
 		startButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
+				rampStatusLabel.setIcon(whichIcon("startRamp"));
 				Thread currentThread = new Thread() {
 					public void run() {
 						runCurrent();
@@ -286,14 +278,19 @@ public class MakeComponents {
 	}
 
 	/** Returns an ImageIcon, or null if the path was invalid. */
-	private ImageIcon createImageIcon(String path, String description) throws FileNotFoundException {
-		ImageIcon temp = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource(path));
-		return temp;
+	protected ImageIcon createImageIcon(String path, String description) {
+		java.net.URL imgURL = getClass().getResource(path);
+		if (imgURL != null) {
+			return new ImageIcon(imgURL, description);
+		} else {
+			System.err.println("Couldn't find file: " + path);
+			return null;
+		}
 	}
 
 	private ImageIcon whichIcon(String command) {
-		ImageIcon red = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/res/red.png"));
-		ImageIcon green = new ImageIcon(Toolkit.getDefaultToolkit().getClass().getResource("/res/green.png"));
+		ImageIcon red = createImageIcon("/res/red.png", "Red dot");
+		ImageIcon green = createImageIcon("/res/green.png", "Green dot");
 		if (command.equals("on") || command.equals("startRamp")) {
 			return green;
 		}
@@ -311,10 +308,29 @@ public class MakeComponents {
 			for (int i = 0; i <= array.length; i++) {
 				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 				Thread.sleep(msecs);
+				if (i == array.length - 1) {
+					rampStatusLabel.setIcon(whichIcon("off"));
+				}
 			}
 
 			return null;
 		}
 	};
+
+	// private class CurrentOperation extends SwingWorker<Void, Void>{
+	// @Override
+	// protected Void doInBackground() throws Exception {
+	// for (int i = 0; i <= array.length; i++) {
+	// currentLabel.setText(device.execute("current_get", new Object[]
+	// {}).toString());
+	// Thread.sleep(msecs);
+	// if(i == array.length - 1){
+	// rampStatusLabel.setIcon(whichIcon("off"));
+	// }
+	// }
+	//
+	// return null;
+	// }
+	// };
 
 }
