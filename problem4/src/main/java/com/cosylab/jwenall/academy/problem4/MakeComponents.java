@@ -9,12 +9,10 @@ import java.util.Arrays;
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-
 import javax.swing.SwingWorker;
 
 public class MakeComponents {
@@ -28,13 +26,12 @@ public class MakeComponents {
 	private String[] array;
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
-	public static CurrentValueFinder cvf;
+	private CurrentValueFinder cvf;
 
 	public MakeComponents() throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		deviceIcon = createImageIcon("/red.png", "Red dot");
 		rampIcon = createImageIcon("/red.png", "Red dot");
-
 	}
 
 	public void placeComponents(JPanel panel) throws FileNotFoundException {
@@ -140,7 +137,7 @@ public class MakeComponents {
 
 	}
 
-	public JLabel makeDescriptionLabel() { // for current value
+	public JLabel makeDescriptionLabel() { 
 		descriptionLabel = new JLabel("Current Value");
 		descriptionLabel.setBounds(140, 100, 80, 25);
 		return descriptionLabel;
@@ -243,18 +240,15 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-
 				if (isInteger(timeText.getText())) {
 					msecs = Integer.parseInt(timeText.getText());
 					logArea.append("Ramping time set to: " + msecs + " msecs \n");
 				} else {
 					logArea.append("Error: Only one number accepted \n");
 				}
-
 			}
 		});
 		return timeText;
-
 	}
 
 	public JLabel makeStartLabel() {
@@ -279,13 +273,9 @@ public class MakeComponents {
 		startButton.setBounds(10, 260, 120, 25);
 
 		startButton.addActionListener(new ActionListener() {
-			
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
 				logArea.append("Ramping started \n");
-//				rampStatusLabel.setIcon(whichIcon("startRamp"));
-//				cvf = new CurrentValueFinder();
-//				cvf.execute();
 				runCurrent();
 			}
 		});
@@ -322,11 +312,8 @@ public class MakeComponents {
 		return red;
 	}
 
-	
 	private void runCurrent() {
 		rampStatusLabel.setIcon(whichIcon("startRamp"));
-		// REVIEW (high): you should assign the "new CurrentValueFinder()" to some class variable. If not, it
-		// can happen that Java's Garbage Collector will remove it once you exit the "runCurrent" method.
 		cvf = new CurrentValueFinder();
 		cvf.execute();
 	}
@@ -342,7 +329,6 @@ public class MakeComponents {
 					logArea.append("Ramping completed \n");
 				}
 			}
-
 			return null;
 		}
 	};
@@ -373,5 +359,4 @@ public class MakeComponents {
 		}
 		return true;
 	}
-
 }

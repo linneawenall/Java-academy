@@ -8,7 +8,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 	protected double[] rampValues;
 	private int msecs;
 	protected double[] postRamping;
-	Thread ramperThread = new Thread(new Ramper());
+	Thread ramperThread;
 
 	public RampedPowerSupplyImpl() {
 		super();
@@ -74,6 +74,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 		} else {
 			this.msecs = msecs;
 			this.postRamping = new double[rampValues.length];
+			ramperThread =  new Thread(new Ramper());
 			ramperThread.start();
 		}
 		System.out.println("Startramp");
