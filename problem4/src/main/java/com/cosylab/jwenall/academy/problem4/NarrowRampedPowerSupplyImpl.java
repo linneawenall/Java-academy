@@ -1,6 +1,5 @@
 package com.cosylab.jwenall.academy.problem4;
 
-import static org.junit.Assert.fail;
 
 public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implements DeviceNarrow {
 

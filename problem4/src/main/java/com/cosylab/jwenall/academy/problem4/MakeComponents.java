@@ -5,17 +5,16 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.FileNotFoundException;
 import java.util.Arrays;
-import java.util.IllegalFormatException;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JFrame;
+
 import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingUtilities;
+
 import javax.swing.SwingWorker;
 
 public class MakeComponents {
@@ -31,14 +30,14 @@ public class MakeComponents {
 	private JTextField timeText, setText, rampText;
 	private Thread currentThread;
 
-	public MakeComponents(JPanel panel) throws FileNotFoundException {
+	public MakeComponents () throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		deviceIcon = createImageIcon("/red.png", "Red dot");
 		rampIcon = createImageIcon("/red.png", "Red dot");
-		placeComponents(panel);
+		//placeComponents(panel);
 	}
 
-	private void placeComponents(JPanel panel) throws FileNotFoundException {
+	public void placeComponents(JPanel panel) throws FileNotFoundException {
 
 		panel.setLayout(null);
 		panel.add(makeDeviceLabel());
@@ -184,7 +183,6 @@ public class MakeComponents {
 				} else {
 					logArea.append("Error: Only numbers accepted \n");
 
-
 				}
 			}
 
@@ -245,18 +243,22 @@ public class MakeComponents {
 
 			@Override
 			public void actionPerformed(ActionEvent e) {
-				
+
 				if (isInteger(timeText.getText())) {
-						msecs = Integer.parseInt(timeText.getText());
-						logArea.append("Ramping time set to: " + msecs + " msecs \n"); //should only happen when on though
-					
+					msecs = Integer.parseInt(timeText.getText());
+					logArea.append("Ramping time set to: " + msecs + " msecs \n"); // should
+																					// only
+																					// happen
+																					// when
+																					// on
+																					// though
+
 				} else {
 					logArea.append("Error: Only one number accepted \n");
 				}
-				
 
-
-		}});
+			}
+		});
 		return timeText;
 
 	}
@@ -370,7 +372,7 @@ public class MakeComponents {
 		}
 		return true;
 	}
-	
+
 	private boolean isInteger(String number) throws NumberFormatException {
 		try {
 			Integer.parseInt(number);
@@ -379,5 +381,5 @@ public class MakeComponents {
 		}
 		return true;
 	}
-	
+
 }
