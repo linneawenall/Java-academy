@@ -28,12 +28,13 @@ public class MakeComponents {
 	private String[] array;
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
+	public static CurrentValueFinder cvf;
 
 	public MakeComponents() throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		deviceIcon = createImageIcon("/red.png", "Red dot");
 		rampIcon = createImageIcon("/red.png", "Red dot");
-		// placeComponents(panel);
+
 	}
 
 	public void placeComponents(JPanel panel) throws FileNotFoundException {
@@ -177,7 +178,7 @@ public class MakeComponents {
 						logArea.append(
 								"Current set to: " + device.execute("current_get", new Object[] {}).toString() + "\n");
 					} catch (IllegalStateException e1) {
-						logArea.append("Error: Device is turned off, can´t set value.\n");
+						logArea.append("Error: Device is turned off, can't set value.\n");
 					}
 				} else {
 					logArea.append("Error: Only numbers accepted \n");
@@ -278,12 +279,14 @@ public class MakeComponents {
 		startButton.setBounds(10, 260, 120, 25);
 
 		startButton.addActionListener(new ActionListener() {
+			
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
 				logArea.append("Ramping started \n");
-				rampStatusLabel.setIcon(whichIcon("startRamp"));
-				(new CurrentValueFinder()).execute();
-				// runCurrent();
+//				rampStatusLabel.setIcon(whichIcon("startRamp"));
+//				cvf = new CurrentValueFinder();
+//				cvf.execute();
+				runCurrent();
 			}
 		});
 		return startButton;
@@ -319,20 +322,20 @@ public class MakeComponents {
 		return red;
 	}
 
-	// Called from non-UI thread
-	// private void runCurrent() {
-	// rampStatusLabel.setIcon(whichIcon("startRamp"));
-	// (new CurrentValueFinder()).execute();
-	// }
+	
+	private void runCurrent() {
+		rampStatusLabel.setIcon(whichIcon("startRamp"));
+		// REVIEW (high): you should assign the "new CurrentValueFinder()" to some class variable. If not, it
+		// can happen that Java's Garbage Collector will remove it once you exit the "runCurrent" method.
+		cvf = new CurrentValueFinder();
+		cvf.execute();
+	}
 
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
 			for (int i = 0; i <= array.length; i++) {
 				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
-				// if (currentThread.isInterrupted()) {
-				// rampStatusLabel.setIcon(whichIcon("off"));
-				// }
 				Thread.sleep(msecs);
 				if (i == array.length - 1) {
 					rampStatusLabel.setIcon(whichIcon("off"));
