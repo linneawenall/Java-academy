@@ -28,13 +28,12 @@ public class MakeComponents {
 	private String[] array;
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
-	private Thread currentThread;
 
-	public MakeComponents () throws FileNotFoundException {
+	public MakeComponents() throws FileNotFoundException {
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		deviceIcon = createImageIcon("/red.png", "Red dot");
 		rampIcon = createImageIcon("/red.png", "Red dot");
-		//placeComponents(panel);
+		// placeComponents(panel);
 	}
 
 	public void placeComponents(JPanel panel) throws FileNotFoundException {
@@ -246,13 +245,7 @@ public class MakeComponents {
 
 				if (isInteger(timeText.getText())) {
 					msecs = Integer.parseInt(timeText.getText());
-					logArea.append("Ramping time set to: " + msecs + " msecs \n"); // should
-																					// only
-																					// happen
-																					// when
-																					// on
-																					// though
-
+					logArea.append("Ramping time set to: " + msecs + " msecs \n");
 				} else {
 					logArea.append("Error: Only one number accepted \n");
 				}
@@ -288,13 +281,9 @@ public class MakeComponents {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
 				logArea.append("Ramping started \n");
-				currentThread = new Thread() {
-					public void run() {
-						runCurrent();
-
-					}
-				};
-				currentThread.start();
+				rampStatusLabel.setIcon(whichIcon("startRamp"));
+				(new CurrentValueFinder()).execute();
+				// runCurrent();
 			}
 		});
 		return startButton;
@@ -331,19 +320,19 @@ public class MakeComponents {
 	}
 
 	// Called from non-UI thread
-	private void runCurrent() {
-		rampStatusLabel.setIcon(whichIcon("startRamp"));
-		(new CurrentValueFinder()).execute();
-	}
+	// private void runCurrent() {
+	// rampStatusLabel.setIcon(whichIcon("startRamp"));
+	// (new CurrentValueFinder()).execute();
+	// }
 
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
 			for (int i = 0; i <= array.length; i++) {
 				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
-				if (currentThread.isInterrupted()) {
-					rampStatusLabel.setIcon(whichIcon("off"));
-				}
+				// if (currentThread.isInterrupted()) {
+				// rampStatusLabel.setIcon(whichIcon("off"));
+				// }
 				Thread.sleep(msecs);
 				if (i == array.length - 1) {
 					rampStatusLabel.setIcon(whichIcon("off"));
