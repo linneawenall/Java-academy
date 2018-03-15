@@ -16,7 +16,8 @@ public class PanelMain {
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.decode("#CCCCFF"));
 		frame.add(panel);
-		MakeComponents comp = new MakeComponents(panel);
+		MakeComponents comp = new MakeComponents();
+		comp.placeComponents(panel);
 		frame.setVisible(true);
 	}
 
