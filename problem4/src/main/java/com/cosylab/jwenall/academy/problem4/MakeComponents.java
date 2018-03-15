@@ -132,7 +132,7 @@ public class MakeComponents {
 					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 					logArea.append("Current reset to: " + currentLabel.getText() + "\n");
 				} catch (IllegalStateException e1) {
-					logArea.append("Error: Device is turned off, can´t reset value.\n");
+					logArea.append("Error: Device is turned off, canï¿½t reset value.\n");
 				}
 			}
 
@@ -179,7 +179,7 @@ public class MakeComponents {
 						logArea.append(
 								"Current set to: " + device.execute("current_get", new Object[] {}).toString() + "\n");
 					} catch (IllegalStateException e1) {
-						logArea.append("Error: Device is turned off, can´t set value.\n");
+						logArea.append("Error: Device is turned off, canï¿½t set value.\n");
 					}
 				} else {
 					logArea.append("Error: Only numbers accepted \n");
@@ -286,6 +286,8 @@ public class MakeComponents {
 			public void actionPerformed(ActionEvent e) {
 				device.execute("startRamp", new Object[] { msecs });
 				logArea.append("Ramping started \n");
+				// REVIEW (medium): I don't think you really need this thread, since you are already using "SwingWorker"
+				// for checking current values asynchronously.
 				currentThread = new Thread() {
 					public void run() {
 						runCurrent();
@@ -331,6 +333,8 @@ public class MakeComponents {
 	// Called from non-UI thread
 	private void runCurrent() {
 		rampStatusLabel.setIcon(whichIcon("startRamp"));
+		// REVIEW (high): you should assign the "new CurrentValueFinder()" to some class variable. If not, it
+		// can happen that Java's Garbage Collector will remove it once you exit the "runCurrent" method.
 		(new CurrentValueFinder()).execute();
 	}
 
