@@ -11,7 +11,7 @@ public class Diamond extends Shape {
 	@Override
 	public void shapeSet(int boardWidth, int boardHeight) {
 		sideLength = 20; // "a few pixels in size"
-		height = (Math.sqrt(3) * sideLength) / 2;
+		height = (Math.sqrt(3) * sideLength);
 		setShapeSize(sideLength, height);
 		super.shapeSet(boardWidth, boardHeight);
 	}
@@ -19,9 +19,9 @@ public class Diamond extends Shape {
 	@Override
 	public void drawShape(Graphics2D g2d) {
 		GeneralPath diamond = new GeneralPath(GeneralPath.WIND_EVEN_ODD);
-		diamond.moveTo(getXpos(), (getYpos() + height));
-		diamond.lineTo(getXpos() + (sideLength / 2), getYpos() + 2 * height);
-		diamond.lineTo(getXpos() + sideLength, getYpos() + height);
+		diamond.moveTo(getXpos(), (getYpos() + height / 2));
+		diamond.lineTo(getXpos() + (sideLength / 2), getYpos() + height);
+		diamond.lineTo(getXpos() + sideLength, getYpos() + height / 2);
 		diamond.lineTo(getXpos() + (sideLength / 2), getYpos());
 
 		g2d.setColor(color);
@@ -30,11 +30,10 @@ public class Diamond extends Shape {
 		System.out.println(getShapeType() + " has been drawn in Class Diamond");
 
 	}
+
 	@Override
-	public String getShapeType(){
+	public String getShapeType() {
 		return "Diamond";
 	}
-
-
 
 }

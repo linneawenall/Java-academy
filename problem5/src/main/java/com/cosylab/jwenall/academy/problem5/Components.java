@@ -11,7 +11,7 @@ import javax.swing.JFrame;
 
 public class Components extends JFrame {
 
-	private Board board;
+	private NewBoard board;
 	private JComboBox<String> shapeComboBox;
 	private JButton launchButton;
 	private String name;
@@ -21,9 +21,8 @@ public class Components extends JFrame {
 		name = Shape.class.getPackage().getName();
 	}
 
-	public void placeComponents(Board board) {
+	public void placeComponents(NewBoard board) {
 		this.board = board;
-		board.setBorder(BorderFactory.createTitledBorder("Control Board"));
 		shapeComboBox = new JComboBox<String>();
 		shapeComboBox.addItem("Box");
 		shapeComboBox.addItem("Circle");

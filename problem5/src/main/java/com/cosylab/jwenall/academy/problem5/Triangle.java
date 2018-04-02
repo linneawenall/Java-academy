@@ -1,6 +1,7 @@
 package com.cosylab.jwenall.academy.problem5;
 
 import java.awt.Graphics2D;
+
 import java.awt.geom.GeneralPath;
 
 public class Triangle extends Shape {
@@ -8,8 +9,12 @@ public class Triangle extends Shape {
 	private double sideLength;
 	private double height;
 
+	// "To create a new construct, e.g. a star, only Star class handling the
+	// drawing of the star must be implemented. " Does that mean I'm not allowed
+	// this shapeSet method? And why does everything work without constructors?
 	@Override
 	public void shapeSet(int boardWidth, int boardHeight) {
+
 		sideLength = 20; // "a few pixels in size"
 		height = (Math.sqrt(3) * sideLength) / 2;
 		setShapeSize(sideLength, height);
@@ -33,8 +38,10 @@ public class Triangle extends Shape {
 		System.out.println(getShapeType() + " has been drawn in Class Triangle");
 
 	}
+
 	@Override
-	public String getShapeType(){
+	public String getShapeType() {
 		return "Triangle";
 	}
+
 }
