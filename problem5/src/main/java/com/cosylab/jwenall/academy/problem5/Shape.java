@@ -15,13 +15,14 @@ public abstract class Shape {
 
 	protected double speed;
 
-	protected double shapeWidth;
-	protected double shapeHeight;
+	protected double shapeWidth = 20;
+	protected double shapeHeight = 20;
 
 	protected Color color;
 
 	public void shapeSet(int boardWidth, int boardHeight) {
 		setBoardBounds(boardWidth, boardHeight);
+		setShapeSize(shapeWidth, shapeHeight);
 		randomPosition();
 		setRandomSpeed();
 		randomDirection();
@@ -34,29 +35,30 @@ public abstract class Shape {
 
 	// checks if it hit's the board wall
 	public void moveShape() {
-//		 double shapeMinX = shapeWidth;
-//	      double shapeMinY = shapeHeight;
-	      double shapeMaxX = boardWidth - shapeWidth;
-	      double shapeMaxY = boardHeight - shapeHeight;
-	      // Calculate the ball's new position
-	      posX += moveX;
-	      posY += moveY;
-	      // Check if the shape moves over the bounds. If so, adjust the position and speed.
-	      if (posX < 0) {
-	         moveX = -moveX; // Reflect along normal
-	         posX = 0;     // Re-position the ball at the edge
-	      } else if (posX > shapeMaxX) {
-	         moveX = -moveX;
-	         posX = shapeMaxX;
-	      }
-	      // May cross both x and y bounds
-	      if (posY < 0) {
-	         moveY = -moveY;
-	         posY = 0;
-	      } else if (posY > shapeMaxY) {
-	         moveY = -moveY;
-	         posY = shapeMaxY;
-	      }
+		// double shapeMinX = shapeWidth;
+		// double shapeMinY = shapeHeight;
+		double shapeMaxX = boardWidth - shapeWidth;
+		double shapeMaxY = boardHeight - shapeHeight;
+		// Calculate the ball's new position
+		posX += moveX;
+		posY += moveY;
+		// Check if the shape moves over the bounds. If so, adjust the position
+		// and speed.
+		if (posX < 0) {
+			moveX = -moveX; // Reflect along normal
+			posX = 0; // Re-position the ball at the edge
+		} else if (posX > shapeMaxX) {
+			moveX = -moveX;
+			posX = shapeMaxX;
+		}
+		// May cross both x and y bounds
+		if (posY < 0) {
+			moveY = -moveY;
+			posY = 0;
+		} else if (posY > shapeMaxY) {
+			moveY = -moveY;
+			posY = shapeMaxY;
+		}
 	}
 
 	public double getXpos() {
@@ -73,13 +75,13 @@ public abstract class Shape {
 	}
 
 	public void setRandomSpeed() {
-		speed = Math.random() * 2; // returns a number from zero to one * 2
+		speed = Math.random() * 4; // returns a number from zero to one * 2
 		System.out.println("speed: " + speed);
 
 	}
 
 	public double getSpeed() {
-		 return (double)Math.sqrt(moveX * moveX + moveY * moveY);
+		return (double) Math.sqrt(moveX * moveX + moveY * moveY);
 	}
 
 	private void randomDirection() {
@@ -91,7 +93,7 @@ public abstract class Shape {
 		System.out.println("moveY: " + moveY);
 	}
 
-	public void setBoardBounds(int width, int height){
+	public void setBoardBounds(int width, int height) {
 		this.boardWidth = width;
 		this.boardHeight = height;
 	}
@@ -108,5 +110,4 @@ public abstract class Shape {
 		return new Color(rgb1, rgb2, rgb3);
 	}
 
-	public abstract String getShapeType();
 }

@@ -72,9 +72,6 @@ public class NewBoard extends JPanel implements ActionListener {
 			shape.shapeSet(getWidth(), getHeight());
 			shapeList.add(shape);
 
-			for (int i = 0; i < shapeList.size(); i++) {
-				System.out.println("Shape at index " + i + ": " + shapeList.get(i).getShapeType());
-			}
 		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
