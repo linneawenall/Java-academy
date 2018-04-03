@@ -24,6 +24,8 @@ public class NewBoard extends JPanel implements ActionListener {
 
 	public NewBoard() {
 		shapeList = new ArrayList<Shape>();
+		timer = new Timer((int) delay, this);
+		
 	}
 
 	// When you create the timer, you specify an action listener to be notified
@@ -58,20 +60,12 @@ public class NewBoard extends JPanel implements ActionListener {
 	public void launchShape(String shapeType) {
 		if (!hasShapes) {
 			hasShapes = true;
+			timer.start();
 		}
 		Shape shape;
 		try {
 			shape = (Shape) Class.forName(shapeType).newInstance();
-			// REVIEW (high): this timer is defined locally.
-			// This means you create a new timer every time you are adding a shape.
-			// You should rewrite the code to use the timer that you defined on the class level.
-			Timer t = new Timer((int) shape.getSpeed(), this);// Swing timers
-																// all share the
-																// same,
-																// pre-existing
-																// timer thread
-			t.setInitialDelay(10);
-			t.start();
+			timer.setDelay((int) shape.getSpeed());
 			shape.shapeSet(getWidth(), getHeight());
 			shapeList.add(shape);
 
