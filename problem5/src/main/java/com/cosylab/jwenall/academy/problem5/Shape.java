@@ -38,14 +38,14 @@ public abstract class Shape {
 		// double shapeMinY = shapeHeight;
 		double shapeMaxX = boardWidth - shapeWidth;
 		double shapeMaxY = boardHeight - shapeHeight;
-		// Calculate the ball's new position
+		// Calculate the shapes's new position
 		posX += moveX;
 		posY += moveY;
 		// Check if the shape moves over the bounds. If so, adjust the position
 		// and speed.
 		if (posX < 0) {
 			moveX = -moveX; // Reflect along normal
-			posX = 0; // Re-position the ball at the edge
+			posX = 0; // Re-position the shape at the edge
 		} else if (posX > shapeMaxX) {
 			moveX = -moveX;
 			posX = shapeMaxX;
