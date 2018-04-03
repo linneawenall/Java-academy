@@ -13,7 +13,7 @@ public abstract class Shape {
 	private int boardWidth;
 	private int boardHeight;
 
-	protected double speed;
+	private double speed;
 
 	protected double shapeWidth = 20;
 	protected double shapeHeight = 20;
@@ -26,8 +26,7 @@ public abstract class Shape {
 		randomPosition();
 		setRandomSpeed();
 		randomDirection();
-
-		color = getRandomColor();
+		setRandomColor();
 	}
 
 	public abstract void drawShape(Graphics2D g2D); // implement in other
@@ -74,7 +73,7 @@ public abstract class Shape {
 		posY = (double) (Math.random() * boardHeight);
 	}
 
-	public void setRandomSpeed() {
+	private void setRandomSpeed() {
 		speed = Math.random() * 4; // returns a number from zero to one * 2
 		System.out.println("speed: " + speed);
 
@@ -93,21 +92,21 @@ public abstract class Shape {
 		System.out.println("moveY: " + moveY);
 	}
 
-	public void setBoardBounds(int width, int height) {
+	private void setBoardBounds(int width, int height) {
 		this.boardWidth = width;
 		this.boardHeight = height;
 	}
 
-	public void setShapeSize(double shapeWidth, double shapeHeight) {
+	private void setShapeSize(double shapeWidth, double shapeHeight) {
 		this.shapeWidth = shapeWidth;
 		this.shapeHeight = shapeHeight;
 	}
 
-	public Color getRandomColor() {
+	private void setRandomColor() {
 		int rgb1 = new Random().nextInt(255) + 1;
 		int rgb2 = new Random().nextInt(255) + 1;
 		int rgb3 = new Random().nextInt(255) + 1;
-		return new Color(rgb1, rgb2, rgb3);
+		color = new Color(rgb1, rgb2, rgb3);
 	}
 
 }
