@@ -58,6 +58,8 @@ public class NewBoard extends JPanel implements ActionListener {
 	}
 
 	public void launchShape(String shapeType) {
+		// REVIEW (medium): wouldn't it make sense to move the code for starting the timer to the constructor?
+		// This way you would be able to lose the "hasShapes" variable and the if statement.
 		if (!hasShapes) {
 			hasShapes = true;
 			timer.start();
