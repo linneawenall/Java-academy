@@ -9,7 +9,7 @@ public class Stock { // maybe add final - should be singleton
 	}
 
 	public static Stock getInstance() {
-		if (instance == null) {//not thread-safe 
+		if (instance == null) {// not thread-safe
 			instance = new Stock();
 		}
 		return instance;
