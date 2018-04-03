@@ -62,6 +62,9 @@ public class NewBoard extends JPanel implements ActionListener {
 		Shape shape;
 		try {
 			shape = (Shape) Class.forName(shapeType).newInstance();
+			// REVIEW (high): this timer is defined locally.
+			// This means you create a new timer every time you are adding a shape.
+			// You should rewrite the code to use the timer that you defined on the class level.
 			Timer t = new Timer((int) shape.getSpeed(), this);// Swing timers
 																// all share the
 																// same,
