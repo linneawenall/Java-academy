@@ -16,7 +16,6 @@ public class NewBoard extends JPanel implements ActionListener {
 	private static final long serialVersionUID = 1L;
 	private ArrayList<Shape> shapeList;
 	Timer timer; // fires one or more action events after a specified delay
-	private boolean hasShapes;
 	// for consistent rendering
 	private long sleepTime;
 	// amount of time to sleep for (in milliseconds)
@@ -25,7 +24,8 @@ public class NewBoard extends JPanel implements ActionListener {
 	public NewBoard() {
 		shapeList = new ArrayList<Shape>();
 		timer = new Timer((int) delay, this);
-		
+		timer.start();
+
 	}
 
 	// When you create the timer, you specify an action listener to be notified
@@ -58,12 +58,6 @@ public class NewBoard extends JPanel implements ActionListener {
 	}
 
 	public void launchShape(String shapeType) {
-		// REVIEW (medium): wouldn't it make sense to move the code for starting the timer to the constructor?
-		// This way you would be able to lose the "hasShapes" variable and the if statement.
-		if (!hasShapes) {
-			hasShapes = true;
-			timer.start();
-		}
 		Shape shape;
 		try {
 			shape = (Shape) Class.forName(shapeType).newInstance();
