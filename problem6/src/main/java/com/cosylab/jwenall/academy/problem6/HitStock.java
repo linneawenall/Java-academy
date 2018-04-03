@@ -18,15 +18,18 @@ public class HitStock {
 		synchronized (HitStock.class) {
 			Stock stock = Stock.getInstance();
 			availableStocks = 800;
+				System.out.println("Stock opening balance: " + startAmount);
 		}
 	}
 
 	public synchronized void buy(int stockAmount) {
-		System.out.println("buy request for " + stockAmount + " for " + Thread.currentThread());
+		//System.out.println("buy request for " + stockAmount + " for " + Thread.currentThread());
 		if (availableStocks >= stockAmount) {
 			System.out.println("BUY of " + stockAmount + " by " + Thread.currentThread());
+			synchronized(this){
 			availableStocks = availableStocks - stockAmount;
 			System.out.println("New Balance " + availableStocks);
+			}
 		} else {
 			System.out.println("NOT ENOUGH STOCKS.");
 			throw new IllegalStateException();
@@ -35,10 +38,12 @@ public class HitStock {
 	}
 
 	public synchronized void sell(int stockAmount) {
-		System.out.println("sell request for " + stockAmount + " for " + Thread.currentThread());
-		availableStocks = availableStocks + stockAmount;
+		//System.out.println("sell request for " + stockAmount + " for " + Thread.currentThread());
 		System.out.println("SELL of " + stockAmount + " by " + Thread.currentThread());
+		synchronized(this){
+		availableStocks = availableStocks + stockAmount;
 		System.out.println("New Balance " + availableStocks);
+		}
 	}
 
 	public int getStartAmount() {
