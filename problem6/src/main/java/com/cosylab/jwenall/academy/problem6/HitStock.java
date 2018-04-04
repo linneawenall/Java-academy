@@ -39,5 +39,9 @@ public class HitStock {
 		availableStocks = availableStocks + stockAmount;
 		System.out.println("New Balance: " + availableStocks);
 	}
+	public int getAvailableStocks(){
+		return availableStocks;
+	}
+	
 
 }

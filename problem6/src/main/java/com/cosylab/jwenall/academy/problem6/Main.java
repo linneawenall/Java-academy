@@ -8,7 +8,6 @@ public class Main {
 
 	public static void main(String[] args) throws InterruptedException {
 
-
 		System.out.println("Write the amount of stocks to start with.");
 		Scanner startStocks = new Scanner(System.in);
 		startAmount = Integer.parseInt(startStocks.nextLine());
@@ -22,10 +21,22 @@ public class Main {
 			brokers.add(new Broker(startAmount));
 			brokers.get(i).start();
 		}
+
 		
-		for(Broker b: brokers){
-			b.join(1000);
-			b.stopTrading();
+		for (Broker broker : brokers) {
+			broker.stopTrading();
 		}
+
+		
+		for (Broker broker : brokers) {
+			try {
+				broker.join();
+			} catch (InterruptedException e) {
+				System.out.println("Simulation has been interrupted. Exception: " + e.getMessage());
+			}
+		}
+
+		System.out.println("\nHitStock closes with " + hitStock.getAvailableStocks() + " available stocks.");
+		System.out.println("Stock exchange simulation finished.");
 	}
 }

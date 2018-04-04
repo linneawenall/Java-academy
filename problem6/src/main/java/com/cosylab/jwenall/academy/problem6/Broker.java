@@ -8,7 +8,6 @@ public class Broker extends Thread {
 	private long sleepMax = 5000;
 	private boolean isRunning;
 
-
 	public Broker(int startAmount) {
 		this.startAmount = startAmount;
 		isRunning = true;
@@ -16,28 +15,24 @@ public class Broker extends Thread {
 	}
 
 	public void run() {
-		while(isRunning);
 
-		// REVIEW (medium): it would make sense introducing the "isRunning" boolean variable and "stopTrading" public
-		// method. This method would control when the broker should stop (you could call this method from the "main" method).
-
-			if (new Random().nextBoolean()) {
-					HitStock.buy(getRandomAmount());
-			} else {
-				HitStock.sell(getRandomAmount());
-			}
-			try {
-				Thread.sleep((long) Math.random() * sleepMax);
-			} catch (InterruptedException e) {
-			}
+		while (isRunning);
+		if (new Random().nextBoolean()) {
+			HitStock.buy(getRandomAmount());
+		} else {
+			HitStock.sell(getRandomAmount());
 		}
-	
+		try {
+			Thread.sleep((long) Math.random() * sleepMax);
+		} catch (InterruptedException e) {
+		}
+	}
 
 	public int getRandomAmount() {
 		return new Random().nextInt(startAmount);
 	}
-	
-	public void stopTrading(){
+
+	public void stopTrading() {
 		isRunning = false;
 	}
 }
