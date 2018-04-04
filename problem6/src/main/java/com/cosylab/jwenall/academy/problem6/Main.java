@@ -22,6 +22,7 @@ public class Main {
 			brokers.get(i).start();
 		}
 
+		// REVIEW (medium): here, it would make sense sleeping for a minute or so, so some trading is performed.
 		
 		for (Broker broker : brokers) {
 			broker.stopTrading();
