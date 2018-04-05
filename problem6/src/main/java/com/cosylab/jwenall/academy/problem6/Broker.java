@@ -6,25 +6,27 @@ import java.util.Random;
 public class Broker extends Thread {
 	private int startAmount;
 	private long sleepMax = 5000;
-	private boolean isRunning;
+	private volatile Thread brokerThread;
 
 	public Broker(int startAmount) {
 		this.startAmount = startAmount;
-		isRunning = true;
+		brokerThread = this;
 
 	}
 
 	public void run() {
-		// REVIEW (medium): hint -> you definitely have a problem in the while loop below, can you guess what it could be? ;)
-		while (isRunning);
-		if (new Random().nextBoolean()) {
-			HitStock.buy(getRandomAmount());
-		} else {
-			HitStock.sell(getRandomAmount());
-		}
-		try {
-			Thread.sleep((long) Math.random() * sleepMax);
-		} catch (InterruptedException e) {
+		Thread thisThread = Thread.currentThread();
+		while (thisThread == brokerThread) {
+			if (new Random().nextBoolean()) {
+				HitStock.buy(getRandomAmount());
+			} else {
+				HitStock.sell(getRandomAmount());
+			}
+			try {
+				Thread.sleep((long) Math.random() * sleepMax);
+			} catch (InterruptedException e) {
+				break;
+			}
 		}
 	}
 
@@ -33,6 +35,7 @@ public class Broker extends Thread {
 	}
 
 	public void stopTrading() {
-		isRunning = false;
+		brokerThread = null;
+
 	}
 }
