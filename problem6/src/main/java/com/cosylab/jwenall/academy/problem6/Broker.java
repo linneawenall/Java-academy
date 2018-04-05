@@ -6,17 +6,17 @@ import java.util.Random;
 public class Broker extends Thread {
 	private int startAmount;
 	private long sleepMax = 5000;
-	private volatile Thread brokerThread;
+
+	private boolean isRunning;
 
 	public Broker(int startAmount) {
 		this.startAmount = startAmount;
-		brokerThread = this;
+		isRunning = true;
 
 	}
 
 	public void run() {
-		Thread thisThread = Thread.currentThread();
-		while (thisThread == brokerThread) {
+		while (isRunning) {
 			if (new Random().nextBoolean()) {
 				HitStock.buy(getRandomAmount());
 			} else {
@@ -35,7 +35,7 @@ public class Broker extends Thread {
 	}
 
 	public void stopTrading() {
-		brokerThread = null;
+		isRunning = false;
 
 	}
 }

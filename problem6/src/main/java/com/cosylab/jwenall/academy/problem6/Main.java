@@ -23,10 +23,9 @@ public class Main {
 		for (int i = 0; i < 5; i++) {
 			brokers.add(new Broker(startAmount));
 			brokers.get(i).start();
-	
 		}
 		
-		Thread.sleep(1000);
+		Thread.sleep(3000);
 		
 		
 		for (Broker broker : brokers) {
