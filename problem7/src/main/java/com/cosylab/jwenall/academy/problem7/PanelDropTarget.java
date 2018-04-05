@@ -97,7 +97,7 @@ public class PanelDropTarget extends JPanel implements DropTargetListener {
 	protected boolean isDragAccepted(DropTargetDragEvent dtde){
 		int dropAction = dtde.getDropAction();
 		int sourceActions = dtde.getSourceActions();
-		boolean acceptedDrag;
+		boolean acceptedDrag = false;
 		
 	    DnDUtils.debugPrintln("\tSource actions are "
 	            + DnDUtils.showActions(sourceActions) + ", drop action is "
@@ -112,7 +112,9 @@ public class PanelDropTarget extends JPanel implements DropTargetListener {
 	    	dtde.acceptDrag(DnDConstants.ACTION_COPY);
 	    	acceptedDrag = true;
 	    }else{
-	    	
+	    	DnDUtils.debugPrintln("Panel Drop target accepting drag");
+	    	dtde.acceptDrag(dropAction);
+	    	acceptedDrag = true;
 	    }
-	    return false;
+	    return acceptedDrag;
 }}
