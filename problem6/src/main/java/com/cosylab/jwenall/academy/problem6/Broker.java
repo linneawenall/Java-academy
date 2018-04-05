@@ -15,7 +15,7 @@ public class Broker extends Thread {
 	}
 
 	public void run() {
-
+		// REVIEW (medium): hint -> you definitely have a problem in the while loop below, can you guess what it could be? ;)
 		while (isRunning);
 		if (new Random().nextBoolean()) {
 			HitStock.buy(getRandomAmount());
