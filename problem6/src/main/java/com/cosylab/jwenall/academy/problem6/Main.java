@@ -2,6 +2,9 @@ package com.cosylab.jwenall.academy.problem6;
 
 import java.util.ArrayList;
 import java.util.Scanner;
+import java.util.concurrent.TimeUnit;
+
+import javax.swing.Timer;
 
 public class Main {
 	private static int startAmount;
@@ -20,8 +23,13 @@ public class Main {
 		for (int i = 0; i < 5; i++) {
 			brokers.add(new Broker(startAmount));
 			brokers.get(i).start();
+			System.out.println("Starting");
 		}
-
+		
+		//TimeUnit.SECONDS.sleep(5);
+		Thread.sleep(1000);
+		System.out.println("After sleep");
+	
 		// REVIEW (medium): here, it would make sense sleeping for a minute or so, so some trading is performed.
 		
 		for (Broker broker : brokers) {
