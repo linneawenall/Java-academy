@@ -18,10 +18,12 @@ import javax.swing.TransferHandler.TransferSupport;
 
 public class DropTargetPanel extends JPanel implements DropTargetListener {
 	private DraggableLabel dragLabel;
+	private TransferHandler transferHandler;
 
 	public DropTargetPanel(DraggableLabel dragLabel) {
 		this.dragLabel = dragLabel;
-
+		transferHandler = new DroppablePanelTransferHandler(this);
+		this.setTransferHandler(transferHandler);
 		new DropTarget(this, this);
 	}
 
@@ -59,7 +61,7 @@ public class DropTargetPanel extends JPanel implements DropTargetListener {
 
 //		try {
 			DraggableLabelTransferable transferable = new DraggableLabelTransferable(dragLabel);
-			DroppablePanelTransferHandler transferHandler = new DroppablePanelTransferHandler(this);
+//			DroppablePanelTransferHandler transferHandler = new DroppablePanelTransferHandler(this);
 			if (transferable.isDataFlavorSupported(transferable.getDataFlavor())) {
 
 				evt.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
@@ -72,10 +74,11 @@ public class DropTargetPanel extends JPanel implements DropTargetListener {
 //				repaint();
 //				validate();
 				//Fix here. How to get the Transfersupport parameter?
-				//TransferSupport transferSupport = new TransferSupport(this, transferable);
+				TransferSupport transferSupport = new TransferSupport(this, transferable);
 				//This returns false, but how do I make it return true?
-//				System.out.println(transferSupport.isDrop());
-//				transferHandler.importData(transferSupport);
+				System.out.println(transferSupport.isDrop());
+				transferHandler.importData(transferSupport);
+	//			transferHandler.importData(this, t);
 				evt.getDropTargetContext().dropComplete(true);
 			} else {
 				evt.rejectDrop();

@@ -23,6 +23,7 @@ public class DraggableLabel extends JLabel implements DragGestureListener, DragS
 		setText(text);
 
 		dragSource = new DragSource();
+	
 
 		dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, this);
 	}
