@@ -65,6 +65,7 @@ public class DropTargetPanel extends JPanel implements DropTargetListener {
 			if (transferable.isDataFlavorSupported(transferable.getDataFlavor())) {
 
 				evt.acceptDrop(DnDConstants.ACTION_COPY_OR_MOVE);
+				//The code below works but not the specific location
 //				DraggableLabel dragContents = (DraggableLabel) transferable
 //					.getTransferData(transferable.getDataFlavor());
 //				Point p = evt.getLocation();
