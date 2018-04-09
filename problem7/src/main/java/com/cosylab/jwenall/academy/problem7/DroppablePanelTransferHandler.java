@@ -27,6 +27,7 @@ public class DroppablePanelTransferHandler extends TransferHandler {
 
 	@Override
 	public boolean canImport(TransferSupport support) {
+		System.out.println("In canImport method in TransferHandler");
 		boolean stringFlavor = support.getTransferable().isDataFlavorSupported(DataFlavor.stringFlavor);
 
 		return stringFlavor | isDraggableFlavorSupported(support);
