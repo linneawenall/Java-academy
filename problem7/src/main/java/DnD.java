@@ -158,6 +158,7 @@ public class DnD {
 	}
 }
 
+// REVIEW (high): extract the class into a separate file.
 class DraggableLabel extends JLabel implements Cloneable {
 	DragSource dragSource;
 
@@ -176,6 +177,7 @@ class DraggableLabel extends JLabel implements Cloneable {
 	}
 }
 
+// REVIEW (high): extract the class into a separate file.
 class MyDragGestureListener implements DragGestureListener, DragSourceListener {
 
 	private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
@@ -255,10 +257,12 @@ class MyDragGestureListener implements DragGestureListener, DragSourceListener {
 	}
 }
 
+// REVIEW (high): Remove this class since it is not used anywhere.
 class ThisTransferHandler extends TransferHandler {
 
 }
 
+// REVIEW (high): extract the class into a separate file.
 class MyDropTargetListener extends DropTargetAdapter {
 	private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
 
