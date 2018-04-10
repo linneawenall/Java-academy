@@ -84,6 +84,7 @@ public class DnD {
 		p.setLayout(null);
 		p.setBorder(new TitledBorder("Drag label onto panel below or textField above"));
 
+
 		TransferHandler dnd = new TransferHandler() {
 			private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
 			@Override
