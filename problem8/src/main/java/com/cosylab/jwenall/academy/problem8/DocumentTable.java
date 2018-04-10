@@ -37,7 +37,7 @@ public class DocumentTable extends JTable {
 	private ArrayList<Document> documentFiles = new ArrayList<Document>();
 
 	public DocumentTable(DocumentTextArea docTextArea) {
-		this. docTextArea = docTextArea;
+		this.docTextArea = docTextArea;
 		init();
 	}
 
@@ -61,7 +61,6 @@ public class DocumentTable extends JTable {
 					// Project name.
 					String projectName = matcher.group(1);
 
-					
 					String date = matcher.group(2);
 					if (!isValidDate(date)) {
 						date = "Invalid date";
@@ -152,6 +151,10 @@ public class DocumentTable extends JTable {
 			return false;
 		}
 		return true;
+	}
+
+	public ArrayList<Document> getDocFiles() {
+		return documentFiles;
 	}
 
 }

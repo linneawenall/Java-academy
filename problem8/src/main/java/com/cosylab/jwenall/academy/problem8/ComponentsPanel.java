@@ -1,9 +1,11 @@
 package com.cosylab.jwenall.academy.problem8;
 
+import java.awt.BorderLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.ParseException;
+import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -12,6 +14,9 @@ import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.border.EmptyBorder;
+import javax.swing.table.JTableHeader;
+
+import com.cosylab.jwenall.academy.problem8.MyTableModel.ColumnListener;
 
 public class ComponentsPanel extends JPanel implements ActionListener {
 
@@ -45,6 +50,15 @@ public class ComponentsPanel extends JPanel implements ActionListener {
 		documentTextArea = new DocumentTextArea();
 		documentTable = new DocumentTable(documentTextArea);
 		folderChooser = new JFileChooser(".");
+		
+		DocumentTableModel docModel = new DocumentTableModel();
+	    
+	    documentTable.setModel(docModel);
+		
+	    JTableHeader header = documentTable.getTableHeader();
+	    header.setUpdateTableInRealTime(true);
+	    header.addMouseListener(new MyHeaderListener(documentTable,docModel));
+	    header.setReorderingAllowed(true);
 
 		// File chooser can choose directories only
 		folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);

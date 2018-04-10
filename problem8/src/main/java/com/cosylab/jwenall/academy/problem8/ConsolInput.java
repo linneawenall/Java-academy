@@ -16,7 +16,7 @@ public class ConsolInput {
 		consolInput(input);
 	}
 
-	public void consolInput(String[] input) throws IOException { //reDo consolinput based on the length of the args array. if lenght == 0, scanner(system.in), if lenght == 1, filereader, if lenght >1 should handle string
+	public void consolInput(String[] input) throws IOException { 
 		if (input == null) {
 			throw new NullPointerException("Error: input is null");
 		}
