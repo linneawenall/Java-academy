@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem2;
+package com.cosylab.jwenall.academy.problem8;
 
 import java.io.BufferedReader;
 import java.io.File;

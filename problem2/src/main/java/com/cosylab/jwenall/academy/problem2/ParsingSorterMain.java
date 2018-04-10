@@ -1,11 +1,12 @@
 package com.cosylab.jwenall.academy.problem2;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Arrays;
 
 public class ParsingSorterMain {
 
-	public static void main(String[] args) throws FileNotFoundException {
+	public static void main(String[] args) throws IOException {
 		System.out.println(Arrays.toString(args));
 		ConsolInput input = new ConsolInput(args);
 		Parsing parser = new Parsing(input.whatsInput());

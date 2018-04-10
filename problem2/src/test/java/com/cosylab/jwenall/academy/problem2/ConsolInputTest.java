@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.io.File;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Scanner;
 
@@ -32,7 +33,7 @@ public class ConsolInputTest {
 	}
 
 	@Test
-	public void testConsolInputString() throws FileNotFoundException {
+	public void testConsolInputString() throws IOException {
 		stringArray = new String[test.length()];
 		stringArray = test.split("[,\\s]+");
 		c = new ConsolInput(stringArray);
@@ -41,7 +42,7 @@ public class ConsolInputTest {
 	}
 
 	@Test
-	public void testConsolInputEmpty() throws FileNotFoundException, NullPointerException {
+	public void testConsolInputEmpty() throws NullPointerException, IOException {
 		stringArray = new String[0];
 		System.out.println("Write 'A: 1,2,9,3.0'");
 		c = new ConsolInput(stringArray);
@@ -49,11 +50,14 @@ public class ConsolInputTest {
 
 	}
 
-	/* This test fails. Still don't understandd how to find the file */
+	
 	@Test
-	public void testConsolInputFile() throws FileNotFoundException {
+	public void testConsolInputFile() throws IOException {
 		stringArray = new String[1];
-		stringArray[0] = "file";
+		file = new File("src/main/resources/file.txt");
+		String path = file.getPath();
+		System.out.println(path);
+		stringArray[0] = path;
 		c = new ConsolInput(stringArray);
 		assertTrue("String input starts with A", c.whatsInput().startsWith("A"));
 	}
