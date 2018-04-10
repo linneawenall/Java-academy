@@ -1,30 +1,13 @@
 import java.awt.BorderLayout;
 import java.awt.Color;
-import java.awt.Component;
-import java.awt.Cursor;
+
 import java.awt.Dimension;
-import java.awt.FlowLayout;
-import java.awt.Point;
-import java.awt.TextField;
 import java.awt.datatransfer.DataFlavor;
 import java.awt.datatransfer.Transferable;
-import java.awt.datatransfer.UnsupportedFlavorException;
-import java.awt.dnd.DnDConstants;
-import java.awt.dnd.DragGestureEvent;
-import java.awt.dnd.DragGestureListener;
-import java.awt.dnd.DragSource;
-import java.awt.dnd.DragSourceDragEvent;
-import java.awt.dnd.DragSourceDropEvent;
-import java.awt.dnd.DragSourceEvent;
-import java.awt.dnd.DragSourceListener;
-import java.awt.dnd.DropTarget;
-import java.awt.dnd.DropTargetAdapter;
-import java.awt.dnd.DropTargetDropEvent;
-import java.io.IOException;
 
 import javax.swing.BorderFactory;
 import javax.swing.JFrame;
-import javax.swing.JLabel;
+
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.SwingUtilities;
@@ -32,7 +15,6 @@ import javax.swing.TransferHandler;
 import javax.swing.border.TitledBorder;
 
 public class DnD {
-
 
 	public static void main(String[] args) {
 		createAndShowJFrame();
@@ -74,7 +56,7 @@ public class DnD {
 	}
 
 	private static JPanel createEmptyJPanel() {
-		
+
 		final JPanel p = new JPanel() {
 			@Override
 			public Dimension getPreferredSize() {
@@ -84,9 +66,9 @@ public class DnD {
 		p.setLayout(null);
 		p.setBorder(new TitledBorder("Drag label onto panel below or textField above"));
 
-
 		TransferHandler dnd = new TransferHandler() {
 			private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
+
 			@Override
 			public boolean canImport(TransferSupport support) {
 				if (!support.isDrop()) {
@@ -121,7 +103,7 @@ public class DnD {
 				return true;
 			}
 		};
-		
+
 		p.setTransferHandler(dnd);
 
 		return p;
@@ -144,7 +126,6 @@ public class DnD {
 		return panel;
 	}
 
-
 	private static JTextField createTextField() {
 		JTextField textField = new JTextField() {
 			@Override
@@ -156,152 +137,5 @@ public class DnD {
 		textField.setDragEnabled(true);
 		textField.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		return textField;
-	}
-}
-
-// REVIEW (high): extract the class into a separate file.
-class DraggableLabel extends JLabel implements Cloneable {
-	DragSource dragSource;
-
-	public DraggableLabel(String text) {
-
-		setText(text);
-		dragSource = new DragSource();
-		MyDragGestureListener listener = new MyDragGestureListener();
-
-		dragSource.createDefaultDragGestureRecognizer(this, DnDConstants.ACTION_COPY_OR_MOVE, listener);
-	}
-
-	@Override
-	protected Object clone() throws CloneNotSupportedException {
-		return super.clone();
-	}
-}
-
-// REVIEW (high): extract the class into a separate file.
-class MyDragGestureListener implements DragGestureListener, DragSourceListener {
-
-	private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
-	private final DataFlavor[] okFlavors = { DataFlavor.stringFlavor, draggableLabelFlavor };
-
-	@Override
-	public void dragGestureRecognized(DragGestureEvent event) {
-		DraggableLabel dLabel = (DraggableLabel) event.getComponent();
-
-		Transferable transferable = new Transferable() {
-			@Override
-			public DataFlavor[] getTransferDataFlavors() {
-				return okFlavors;
-			}
-
-			@Override
-			public boolean isDataFlavorSupported(DataFlavor flavor) {
-				for (DataFlavor supportFlavor : okFlavors) {
-					if (supportFlavor.equals(flavor)) {
-						return true;
-					}
-				}
-				return false;
-			}
-
-			@Override
-			public Object getTransferData(DataFlavor flavor) throws UnsupportedFlavorException, IOException {
-				System.out.println("In getTransferData");
-				if (flavor.equals(draggableLabelFlavor)) {
-					try {
-						System.out.println("DnD: A clone is created");
-						return dLabel.clone();
-					} catch (CloneNotSupportedException e) {
-					}
-				} else if (flavor.equals(DataFlavor.stringFlavor)) {
-					System.out.println("DnD: The text is returned");
-					return dLabel.getText();
-				}
-
-				return null;
-
-			}
-		};
-
-		new DragSource().startDrag(event, DragSource.DefaultCopyDrop, transferable, this);
-
-	}
-
-	@Override
-	public void dragDropEnd(DragSourceDropEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dragEnter(DragSourceDragEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dragExit(DragSourceEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dragOver(DragSourceDragEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-
-	@Override
-	public void dropActionChanged(DragSourceDragEvent arg0) {
-		// TODO Auto-generated method stub
-
-	}
-}
-
-// REVIEW (high): Remove this class since it is not used anywhere.
-class ThisTransferHandler extends TransferHandler {
-
-}
-
-// REVIEW (high): extract the class into a separate file.
-class MyDropTargetListener extends DropTargetAdapter {
-	private DataFlavor draggableLabelFlavor = new DataFlavor(DraggableLabel.class, "DraggableLabel");
-
-	private DropTarget dropTarget;
-	private JPanel p;
-
-	public MyDropTargetListener(JPanel panel) {
-		p = panel;
-		this.dropTarget = new DropTarget(panel, DnDConstants.ACTION_COPY, this, true, null);
-
-	}
-
-	@Override
-	public void drop(DropTargetDropEvent event) {
-		try {
-			DropTarget test = (DropTarget) event.getSource();
-			Component ca = (Component) test.getComponent();
-			Point dropPoint = ca.getMousePosition();
-			Transferable transferable = event.getTransferable();
-//			System.out.println(event.isDataFlavorSupported(draggableLabelFlavor));
-//			System.out.println(draggableLabelFlavor.toString());
-			if (event.isDataFlavorSupported(draggableLabelFlavor)) {
-//				System.out.println("in if");
-				DraggableLabel dragContents = (DraggableLabel) transferable.getTransferData(draggableLabelFlavor);
-//				System.out.println("After dragcontents");
-				if (dragContents != null) {
-					dragContents.setLocation(dropPoint);
-					p.add(dragContents);
-					p.revalidate();
-					p.repaint();
-					event.dropComplete(true);
-
-				}
-			} else {
-				event.rejectDrop();
-			}
-		} catch (Exception e) {
-			event.rejectDrop();
-		}
 	}
 }
