@@ -7,10 +7,6 @@ public class DocumentTextArea extends JTextArea {
 	// Serial version UID
 	private static final long serialVersionUID = 7665635049178799501L;
 
-//May as well delete this for use of default constructor
-	public DocumentTextArea() {
-	}
-
 	public void update(String line) {
 		append(line);
 	}

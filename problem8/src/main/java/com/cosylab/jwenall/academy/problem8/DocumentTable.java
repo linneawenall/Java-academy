@@ -3,6 +3,7 @@ package com.cosylab.jwenall.academy.problem8;
 import java.io.File;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.List;
 import java.util.regex.Matcher;
 
 import java.awt.event.MouseAdapter;
@@ -26,11 +27,11 @@ public class DocumentTable extends JTable {
 	DocumentTextArea docTextArea;
 
 	// Regular expression for filtering files.
-	private final static String FILTER_REGEX = "^(.+)-(\\d{4}-\\d{2}-\\d{2})-No(\\d{2})\\.(.+)$";
-	private final static Pattern PATTERN = Pattern.compile(FILTER_REGEX);
+	private final  String FILTER_REGEX = "^(.+)-(\\d{4}-\\d{2}-\\d{2})-No(\\d{2})\\.(.+)$";
+	private final Pattern PATTERN = Pattern.compile(FILTER_REGEX);
 
 	// List of filtered documents.
-	private ArrayList<Document> documentFiles = new ArrayList<Document>();
+	private ArrayList<Document> documentFiles = new ArrayList<>();
 
 	public DocumentTable(DocumentTextArea docTextArea) {
 		this.docTextArea = docTextArea;
@@ -43,7 +44,7 @@ public class DocumentTable extends JTable {
 
 	}
 
-	public void createDocuments(File directory) throws ParseException {
+	public void createDocuments(File directory) {
 
 		// Matches file names with FILTER_REGEX.
 		Matcher matcher;
@@ -59,7 +60,6 @@ public class DocumentTable extends JTable {
 
 					String date = matcher.group(2);
 					if (!isValidDate(date)) {
-						// date = "Invalid date";
 						System.out.println("ERROR: Date invalid for file: " + documentFile.getAbsolutePath());
 						date = null;
 					}
@@ -156,7 +156,7 @@ public class DocumentTable extends JTable {
 		return true;
 	}
 
-	public ArrayList<Document> getdocFiles() {
+	public List getdocFiles() {
 		return documentFiles;
 	}
 
