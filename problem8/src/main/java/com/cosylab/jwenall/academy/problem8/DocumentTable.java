@@ -8,24 +8,20 @@ import java.util.regex.Matcher;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
 import java.io.BufferedReader;
-import java.io.File;
 import java.io.FileReader;
 import java.io.IOException;
 import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.swing.JTable;
-import javax.swing.ListSelectionModel;
 import javax.swing.SwingUtilities;
-import javax.swing.table.TableColumn;
-import javax.swing.table.TableModel;
-import javax.swing.table.TableRowSorter;
 
 public class DocumentTable extends JTable {
+
+	/**
+	 * 
+	 */
+	private static final long serialVersionUID = 1L;
 
 	DocumentTextArea docTextArea;
 
@@ -63,9 +59,10 @@ public class DocumentTable extends JTable {
 
 					String date = matcher.group(2);
 					if (!isValidDate(date)) {
-						date = "Invalid date";
+						// date = "Invalid date";
+						System.out.println("ERROR: Date invalid for file: " + documentFile.getAbsolutePath());
+						date = null;
 					}
-					System.out.println(date);
 
 					// Document's number.
 					int documentNumber = Integer.parseInt(matcher.group(3));
@@ -77,7 +74,11 @@ public class DocumentTable extends JTable {
 					String path = documentFile.getAbsolutePath();
 
 					// Create new 'Document' object and add it to ArrayList.
-					documentFiles.add(new Document(projectName, date, documentNumber, suffix, path));
+					if ((date != null) && (suffix != null) && (projectName != null)) {
+						documentFiles.add(new Document(projectName, date, documentNumber, suffix, path));
+					} else {
+						docTextArea.append("\n ERROR: Date invalid for file:" + documentFile.getAbsolutePath());
+					}
 				}
 			}
 		}
@@ -87,15 +88,14 @@ public class DocumentTable extends JTable {
 
 		// Show content only if listener is assigned.
 		if (docTextArea != null) {
-			System.out.println("In if in showText");
 			// Render text in other thread.
 			SwingUtilities.invokeLater(new Runnable() {
 				@Override
 				public void run() {
 					try {
+
 						// Path of selected document.
 						String path = documentFiles.get(documentIndex).getPath();
-						System.out.println(path);
 						BufferedReader input = new BufferedReader(new FileReader(path));
 
 						// Clean text area before adding text.
@@ -124,10 +124,13 @@ public class DocumentTable extends JTable {
 			public void mouseClicked(MouseEvent e) {
 				super.mouseClicked(e);
 				if (e.getClickCount() == 2) {
-					System.out.println("Click recorded");
 					DocumentTable tempTable = (DocumentTable) e.getSource();
 
 					int documentIndex = tempTable.getSelectedRow();
+					int modelIndex = convertRowIndexToModel(documentIndex);
+					if (documentIndex != modelIndex) {
+						documentIndex = modelIndex;
+					}
 					showText(documentIndex);
 				}
 			}
@@ -153,8 +156,14 @@ public class DocumentTable extends JTable {
 		return true;
 	}
 
-	public ArrayList<Document> getDocFiles() {
+	public ArrayList<Document> getdocFiles() {
 		return documentFiles;
+	}
+
+	public void clearView() {
+		documentFiles.clear();
+		docTextArea.clean();
+
 	}
 
 }

@@ -1,11 +1,10 @@
 package com.cosylab.jwenall.academy.problem8;
 
-import java.awt.BorderLayout;
+
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.File;
 import java.text.ParseException;
-import java.util.ArrayList;
 
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -13,10 +12,11 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
+import javax.swing.JTextField;
+import javax.swing.ListSelectionModel;
 import javax.swing.border.EmptyBorder;
-import javax.swing.table.JTableHeader;
+import javax.swing.table.TableRowSorter;
 
-import com.cosylab.jwenall.academy.problem8.MyTableModel.ColumnListener;
 
 public class ComponentsPanel extends JPanel implements ActionListener {
 
@@ -29,6 +29,7 @@ public class ComponentsPanel extends JPanel implements ActionListener {
 	private JButton openButton;
 	private DocumentTextArea documentTextArea;
 	private JFileChooser folderChooser;
+	private JTextField statusText;
 
 	public ComponentsPanel() {
 		// Call super constructor.
@@ -52,13 +53,40 @@ public class ComponentsPanel extends JPanel implements ActionListener {
 		folderChooser = new JFileChooser(".");
 		
 		DocumentTableModel docModel = new DocumentTableModel();
+		
+
+
+	    documentTable.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+	    
 	    
 	    documentTable.setModel(docModel);
+	    TableRowSorter sort = new TableRowSorter<DocumentTableModel>(docModel);
+	    documentTable.setRowSorter(sort);
+
+		 
+	        //When selection changes, provide user with row numbers for
+	        //both view and model.
+//	        documentTable.getSelectionModel().addListSelectionListener(
+//	                new ListSelectionListener() {
+//	                    public void valueChanged(ListSelectionEvent event) {
+//	                        int viewRow = documentTable.getSelectedRow();
+//	                        if (viewRow < 0) {
+//	                            System.out.println("Pressed header.");
+//	                        } else {
+//	                            int modelRow = 
+//	                                documentTable.convertRowIndexToModel(viewRow);
+//	                            System.out.println(
+//	                                String.format("Selected Row in view: %d. " +
+//	                                    "Selected Row in model: %d.", 
+//	                                    viewRow, modelRow));
+//	                        }
+//	                    }
+//	                }
+//	        );
+
+	        
 		
-	    JTableHeader header = documentTable.getTableHeader();
-	    header.setUpdateTableInRealTime(true);
-	    header.addMouseListener(new MyHeaderListener(documentTable,docModel));
-	    header.setReorderingAllowed(true);
+		
 
 		// File chooser can choose directories only
 		folderChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
@@ -88,7 +116,7 @@ public class ComponentsPanel extends JPanel implements ActionListener {
 
 	private void operateWithTable(File directory) throws ParseException {
 		// Clear previous files if any
-		// documentTable.clearView();
+		 documentTable.clearView();
 
 		// Create showing files
 		documentTable.createDocuments(directory);
