@@ -1,8 +1,9 @@
-package com.cosylab.jwenall.academy.problem9;
-
 import java.io.Serializable;
 
-//Just like the class "Student" from  StackOverFlow example
+/**
+ * @author Dejan Kostadinovski
+ *
+ */
 public class Command implements Serializable {
 
 	private static final long serialVersionUID = 2334595196329179652L;

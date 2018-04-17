@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem9;
+
 
 public class NarrowPowerSupplyImpl implements DeviceNarrow {//is a wrapper cuz wraps around PowerSupplyImpl
 	protected PowerSupplyImpl ps;
@@ -33,4 +33,15 @@ public class NarrowPowerSupplyImpl implements DeviceNarrow {//is a wrapper cuz w
 		}
 
 	}
+
+	@Override
+	public boolean isOn() {
+		return ps.isOn();
+	}
+
+	@Override
+	public boolean isRamping() {
+		return false;
+	}
+
 }

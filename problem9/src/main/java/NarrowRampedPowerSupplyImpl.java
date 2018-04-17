@@ -1,14 +1,14 @@
-package com.cosylab.jwenall.academy.problem9;
-
 
 public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implements DeviceNarrow {
+	private RampedPowerSupply rps;
 
 	public NarrowRampedPowerSupplyImpl(RampedPowerSupplyImpl rps) {
 		super(rps);
+		this.rps=rps;
 	}
 
 	@Override
-	public Object execute(String command, Object[] params)throws NullPointerException, IllegalArgumentException {
+	public Object execute(String command, Object[] params) throws NullPointerException, IllegalArgumentException {
 		switch (command) {
 		case "on":
 		case "off":
@@ -17,7 +17,6 @@ public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implement
 		case "current_set":
 			return super.execute(command, params);
 		case "loadRamp":
-		
 			if (params.length == 0) {
 				throw new NullPointerException("Params is null");
 			} else {
@@ -45,6 +44,14 @@ public class NarrowRampedPowerSupplyImpl extends NarrowPowerSupplyImpl implement
 
 	}
 
+	@Override
+	public boolean isOn() {
+		return super.isOn();
+	}
 
+	@Override
+	public boolean isRamping() {
+		return rps.isRamping();
+	}
 
 }

@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem9;
+
 
 public interface PowerSupply {
 
@@ -17,5 +17,7 @@ public interface PowerSupply {
 
 	/* Will set the current in the power supply to the given value. */
 	public void set(double value);
+	
+	public boolean isOn();
 
 }

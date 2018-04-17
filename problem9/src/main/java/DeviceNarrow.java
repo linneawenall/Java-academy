@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem9;
+
 
 
 /* Construct the commands of the 'narrow' interface 
@@ -8,5 +8,11 @@ public interface DeviceNarrow {
 
 
 	public Object execute (String command, Object [] params);
+	
+	public boolean isOn();
+
+	public boolean isRamping();
+
+
 	
 }

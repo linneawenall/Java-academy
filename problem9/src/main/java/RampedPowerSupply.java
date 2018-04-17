@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem9;
+
 
 public interface RampedPowerSupply extends PowerSupply {
 
@@ -7,5 +7,7 @@ public interface RampedPowerSupply extends PowerSupply {
 
 	/* Loads ramp values given as an array of double values. */
 	public void loadRamp(double[] rampValues);
+	
+	public boolean isRamping();
 
 }

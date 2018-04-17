@@ -1,4 +1,4 @@
-package com.cosylab.jwenall.academy.problem9;
+
 
 import java.util.ArrayList;
 import java.util.HashMap;
