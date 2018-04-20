@@ -261,9 +261,9 @@ public class WorkerRunnable implements Runnable {
 				device.execute("startRamp", new Object[] { 1000 });
 
 				logUpdate = "Current ramping";
-
-				cvf.setStuff(input, rampValues);
-				cvf.execute();
+//
+//				cvf.setStuff(input, rampValues);
+//				cvf.execute();
 				//
 				// cvf.setInfo(changes);
 				// currentValue = (String) changes[0];
