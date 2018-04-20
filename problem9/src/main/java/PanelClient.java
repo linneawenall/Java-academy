@@ -36,7 +36,7 @@ public class PanelClient implements ActionListener {
 	private String[] array;
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
-//	private CurrentValueFinder cvf;
+	// private CurrentValueFinder cvf;
 
 	// Connection
 	private static Socket clientSocket;
@@ -47,6 +47,8 @@ public class PanelClient implements ActionListener {
 	private Object[] fromServer;
 
 	private Object[] params;
+
+	private Command lastCommand = null;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
@@ -84,9 +86,14 @@ public class PanelClient implements ActionListener {
 					System.out.print(" index[" + i + "] is " + fromServer[i]);
 
 				}
+				
 				System.out.println("");
 				updateGUI(fromServer);
 				if (fromUser != null) {
+					System.out.println("In if statement");
+					
+					lastCommand = fromUser;
+					
 					System.out.println("Client: " + fromUser.getName());
 					out.writeObject(fromUser);
 				}
@@ -135,7 +142,7 @@ public class PanelClient implements ActionListener {
 				logArea.append("Only numbers");
 			}
 		} else if (evt.getSource().equals(timeText)) {
-			//These things should be done in WorkerRunnable
+			// These things should be done in WorkerRunnable
 			if (isInteger(timeText.getText())) {
 				msecs = Integer.parseInt(timeText.getText());
 				logArea.append("Ramping time set to: " + msecs + " msecs \n");
@@ -145,7 +152,7 @@ public class PanelClient implements ActionListener {
 			}
 		} else if (evt.getSource().equals(startButton)) {
 			fromUser = new Command("startRamp", new Object[] { msecs });
-		
+
 		}
 	}
 
@@ -342,26 +349,27 @@ public class PanelClient implements ActionListener {
 		return red;
 	}
 
-//	private void runCurrent() {
-//		rampStatusLabel.setIcon(whichIcon(true));
-//		cvf = new CurrentValueFinder();
-//		cvf.execute();
-//	}
-//
-//	private class CurrentValueFinder extends SwingWorker<Void, Void> {
-//		@Override
-//		protected Void doInBackground() throws Exception {
-//			for (int i = 0; i <= array.length; i++) {
-//				currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
-//				Thread.sleep(msecs);
-//				if (i == array.length - 1) {
-//					rampStatusLabel.setIcon(whichIcon(false));
-//					logArea.append("Ramping completed \n");
-//				}
-//			}
-//			return null;
-//		}
-//	};
+	// private void runCurrent() {
+	// rampStatusLabel.setIcon(whichIcon(true));
+	// cvf = new CurrentValueFinder();
+	// cvf.execute();
+	// }
+	//
+	// private class CurrentValueFinder extends SwingWorker<Void, Void> {
+	// @Override
+	// protected Void doInBackground() throws Exception {
+	// for (int i = 0; i <= array.length; i++) {
+	// currentLabel.setText(device.execute("current_get", new Object[]
+	// {}).toString());
+	// Thread.sleep(msecs);
+	// if (i == array.length - 1) {
+	// rampStatusLabel.setIcon(whichIcon(false));
+	// logArea.append("Ramping completed \n");
+	// }
+	// }
+	// return null;
+	// }
+	// };
 
 	private boolean isDouble(String number) throws NumberFormatException {
 		try {

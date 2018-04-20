@@ -35,10 +35,10 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 
 	/* Will set the current in the power supply to the given value. */
 	public void set(double value) throws IllegalStateException {
-		if (!isRamping()) {
+//		if (!isRamping()) {
 			super.set(value);
-		} else
-			throw new IllegalStateException("Can not set value, power is ramping");
+//		} else
+//			throw new IllegalStateException("Can not set value, power is ramping");
 
 	}
 
