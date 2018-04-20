@@ -86,14 +86,14 @@ public class PanelClient implements ActionListener {
 					System.out.print(" index[" + i + "] is " + fromServer[i]);
 
 				}
-				
+
 				System.out.println("");
 				updateGUI(fromServer);
 				if (fromUser != null) {
 					System.out.println("In if statement");
-					
+
 					lastCommand = fromUser;
-					
+
 					System.out.println("Client: " + fromUser.getName());
 					out.writeObject(fromUser);
 				}
@@ -399,10 +399,15 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void updateGUI(Object[] fromServer) {
-		System.out.println("UdtateGUI: currentLabel " + (String) fromServer[0]);
-		currentLabel.setText((String) fromServer[0]);
-		System.out.println("UdtateGUI: logArea " + (String) fromServer[1]);
-		logArea.append((String) fromServer[1] + "\n");
+		if ((String) fromServer[0] != null) {
+			System.out.println("UdtateGUI: currentLabel " + (String) fromServer[0]);
+			currentLabel.setText((String) fromServer[0]);
+		}
+		if ((String) fromServer[1] != null) {
+			System.out.println("UdtateGUI: logArea " + (String) fromServer[1]);
+			logArea.append((String) fromServer[1] + "\n");
+		}
+
 		System.out.println("UpdateGUI: icon " + fromServer[2]);
 		deviceLabel.setIcon(whichIcon((boolean) fromServer[2]));
 		rampStatusLabel.setIcon(whichIcon((boolean) fromServer[3]));

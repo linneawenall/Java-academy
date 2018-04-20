@@ -34,7 +34,6 @@ public class WorkerRunnable implements Runnable {
 
 	private Command lastCommand = null;
 
-
 	public WorkerRunnable(Socket clientSocket, String serverText) {
 		System.out.println("WorkerRunnable initiated");
 		this.clientSocket = clientSocket;
@@ -60,12 +59,12 @@ public class WorkerRunnable implements Runnable {
 			cvf = new CurrentValueFinder();
 
 			while ((inputCommand = (Command) objectIn.readObject()) != null) {
-				if (inputCommand!=lastCommand) {
-					System.out.println("In if loop with inputCommand: " + inputCommand.getName());
-					changes = processInput(inputCommand);
-					lastCommand = inputCommand;
-					objectOut.writeObject(changes);
-				}
+				// if (inputCommand!=lastCommand) {
+				System.out.println("In if loop with inputCommand: " + inputCommand.getName());
+				changes = processInput(inputCommand);
+				// lastCommand = inputCommand;
+				objectOut.writeObject(changes);
+				// }
 
 			}
 		} catch (IOException e) {
@@ -78,10 +77,19 @@ public class WorkerRunnable implements Runnable {
 	}
 
 	public Object[] processInput(Command input) {
-		if(input.equals(lastCommand)){
-		}
 		changes = new Object[4];
-		if (input.getName().equals("started")) {
+		if (input.equals(lastCommand)) {
+
+
+			changes[0] = currentValue;
+			changes[1] = null;
+			changes[2] = isOn;
+			changes[3] = isRamping;
+
+			lastCommand = input;
+			return changes;
+
+		} else if (input.getName().equals("started")) {
 			System.out.println("Starting server in processInput");
 			currentValue = "";
 			logUpdate = "Connection established with server";
@@ -170,10 +178,12 @@ public class WorkerRunnable implements Runnable {
 
 			}
 		}
+
 		changes[0] = currentValue;
 		changes[1] = logUpdate;
 		changes[2] = isOn;
 		changes[3] = isRamping;
+
 		lastCommand = input;
 		return changes;
 	}
