@@ -121,7 +121,8 @@ public class WorkerRunnable implements Runnable {
 			cvf = new CurrentValueFinder();
 
 			while ((inputCommand = (Command) objectIn.readObject()) != null) {
-				System.out.println("In while loop with inputCommand: " + inputCommand.getName());
+				// System.out.println("In while loop with inputCommand: " +
+				// inputCommand.getName());
 				changes = processInput(inputCommand);
 				objectOut.writeObject(changes);
 			}
@@ -255,24 +256,43 @@ public class WorkerRunnable implements Runnable {
 				isRamping = false;
 			}
 		} else if (input.getName().equals("startRamp")) {
-			if (device.isOn() && !device.isRamping()) {
-
-				device.execute("startRamp", input.getParamters());
+			if ((device.isOn() && !device.isRamping())) {
+				System.out.println("In first if statement for startramp");
+				device.execute("startRamp", new Object[] { 1000 });
 
 				logUpdate = "Current ramping";
 
 				cvf.setStuff(input, rampValues);
 				cvf.execute();
-
-				cvf.setInfo(changes);
+				//
+				// cvf.setInfo(changes);
+				// currentValue = (String) changes[0];
+				// logUpdate = (String) changes[1];
+				// isOn = (boolean) changes[2];
+				// isRamping = (boolean) changes[3];
 				// currentValue = device.execute("current_get",
 				// input.getParamters()).toString();
 
 				// isOn = device.isOn();
 				// fix this bit
 				// isRamping = device.isRamping();
-			} else if (device.isRamping()) {
-				cvf.setInfo(changes);
+			}
+			if (device.isRamping()) {
+				System.out.println("Device is ramping if statement");
+				// cvf.execute();
+				// cvf.setInfo(changes);
+				// currentValue = (String) changes[0];
+				// logUpdate = (String) changes[1];
+				// isOn = (boolean) changes[2];
+				// isRamping = (boolean) changes[3];
+				// currentValue = cvf.getCurrent();
+				// logUpdate = cvf.getlogUpdate();
+				// isOn = cvf.getIsOn();
+				// isRamping = cvf.getIsItRamping();
+				currentValue = (String) device.execute("current_get", null).toString();
+				logUpdate = "In if state ramping with current set to " + currentValue;
+				isOn = device.isOn();
+				isRamping = device.isRamping();
 			}
 		}
 		changes[0] = currentValue;
@@ -285,6 +305,10 @@ public class WorkerRunnable implements Runnable {
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		private Command command;
 		private Object[] rampArray;
+		private String current;
+		String logUpdateThis;
+		boolean isItOn;
+		boolean isItRamping;
 
 		public void setStuff(Command command, Object[] rampArray) {
 			this.command = command;
@@ -292,27 +316,52 @@ public class WorkerRunnable implements Runnable {
 		}
 
 		public Object[] setInfo(Object[] changes) {
-			changes[0] = currentValue;
-			// changes[1] = logUpdate;
-			changes[2] = isOn;
-			changes[3] = isRamping;
+			System.out.println("SetInfo - current set to " + current);
+			changes[0] = current;
+			System.out.println("SetInfo - logUpdate set to " + logUpdateThis);
+			changes[1] = logUpdateThis;
+			System.out.println("SetInfo - isItOn set to " + isItOn);
+			changes[2] = isItOn;
+			System.out.println("SetInfo - isItRamping set to " + isItRamping);
+			changes[3] = isItRamping;
 			return changes;
+		}
+
+		public String getCurrent() {
+			return current;
+		}
+
+		public String getlogUpdate() {
+			return logUpdateThis;
+		}
+
+		public boolean getIsOn() {
+			return isItOn;
+		}
+
+		public boolean getIsItRamping() {
+			return isItRamping;
 		}
 
 		@Override
 		protected Void doInBackground() throws Exception {
+			System.out.println("Do in background method");
 			for (int i = 0; i <= rampArray.length; i++) {
-				currentValue = device.execute("current_get", null).toString();
-				isRamping = device.isRamping();
-				isOn = device.isOn();
+				current = device.execute("current_get", null).toString();
+				System.out.println("Currentvalue in loop index " + i + " is " + currentValue);
+				isItRamping = device.isRamping();
+				isItOn = device.isOn();
+				logUpdateThis = "Ramping set current value to " + current;
 				Thread.sleep((long) command.getParamters()[0]);
 
 				if (i == rampArray.length - 1) {
-					isRamping = device.isRamping();
-					logUpdate = "Ramping completed \n";
+					isItRamping = false;
+					logUpdateThis = "Ramping completed \n";
 				}
+				// setInfo(changes);
 
 			}
+
 			return null;
 		}
 	};
