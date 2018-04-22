@@ -4,18 +4,15 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.WindowAdapter;
 import java.awt.event.WindowEvent;
-import java.io.BufferedReader;
+
 import java.io.FileNotFoundException;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
+
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
-import java.io.OutputStream;
-import java.io.PrintWriter;
+
 import java.net.Socket;
 import java.net.UnknownHostException;
-import java.util.Arrays;
 
 import javax.swing.BorderFactory;
 import javax.swing.ImageIcon;
@@ -26,7 +23,6 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingWorker;
 import javax.swing.text.DefaultCaret;
 
 public class PanelClient implements ActionListener {
@@ -45,7 +41,6 @@ public class PanelClient implements ActionListener {
 	private static final int PORT = 4444;
 
 	private static Command fromUser;
-	private Object[] fromServer;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
@@ -79,6 +74,8 @@ public class PanelClient implements ActionListener {
 
 			fromUser = new Command("started", null);
 
+			Object[] fromServer = null;
+
 			while ((fromServer = (Object[]) in.readObject()) != null) {
 				if (fromServer.length == 1) {
 					logArea.append(fromServer[0].toString());
@@ -92,7 +89,7 @@ public class PanelClient implements ActionListener {
 					out.writeObject(fromUser);
 				}
 			}
-
+			clientSocket.close();
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
 			System.exit(1);
@@ -153,18 +150,22 @@ public class PanelClient implements ActionListener {
 		panel.add(makeTimeField());
 		panel.add(makeStartLabel());
 		panel.add(makeRampStatusLabel());
-		panel.add(makeLogArea());
-		
-		JScrollPane scrollPane = new JScrollPane();
-scrollPane.setViewportView(logArea);
-        
-        // Auto scrolls to the bottom of the {@code logScreen}
-		DefaultCaret caret = (DefaultCaret)logArea.getCaret();
-        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
-        
-        panel.add(scrollPane);
-		
+		panel.add(makeScrollPane(makeLogArea()));
 
+		// Auto scrolls to the bottom of the code
+		DefaultCaret caret = (DefaultCaret) logArea.getCaret();
+		caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+
+	}
+
+	public JScrollPane makeScrollPane(JTextArea textArea) {
+		JScrollPane scrollPane = new JScrollPane(textArea);
+		scrollPane.setBackground(Color.WHITE);
+
+		scrollPane.setBorder(BorderFactory.createLineBorder(Color.BLACK));
+		scrollPane.setBackground(Color.WHITE);
+		scrollPane.setBounds(10, 320, 230, 130);
+		return scrollPane;
 	}
 
 	public JLabel makeDeviceLabel() {

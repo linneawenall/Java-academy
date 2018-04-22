@@ -11,19 +11,17 @@ public class WorkerRunnable implements Runnable {
 	protected Socket clientSocket = null;
 	protected String serverText = null;
 
-	private Command inputCommand;
 
 	private DeviceNarrow device;
 
 	private Object[] changes;
 	private Object[] rampValues;
 
-	private String currentValue = null;
 	private String logUpdate = null;
 	private boolean finishedRamping = false;
 	private boolean isConnected = false;
 
-	private CurrentValueFinder cvf;
+	
 	private int msecs;
 
 	private Command lastCommand = null;
@@ -46,6 +44,8 @@ public class WorkerRunnable implements Runnable {
 
 			ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
 			objectOut.writeObject(changes);
+			
+			Command inputCommand = null;
 
 			while ((inputCommand = (Command) objectIn.readObject()) != null) {
 
@@ -66,11 +66,10 @@ public class WorkerRunnable implements Runnable {
 
 		// Checks if the while loop sends the same command again
 		if (input.equals(lastCommand)) {
-			if (finishedRamping) {
-				logUpdate = "Ramping completed";
-				finishedRamping = false;
-			} else {
+			if (!finishedRamping) {
 				logUpdate = null;
+			} else {
+				finishedRamping = false;
 			}
 
 			// Set's up initial while loop connection
@@ -87,14 +86,15 @@ public class WorkerRunnable implements Runnable {
 			if (input.getName().equals("on")) {
 				device.execute(input.getName(), input.getParamters());
 				logUpdate = "Device is turned ON";
-				currentValue = device.execute("current_get", null).toString();
 			} else {
-				currentValue = "";
 				logUpdate = "Error: Could not perform command,\n power is OFF";
 			}
+			// Updates log area if commands are made while ramping
+		} else if (device.isRamping()) {
+			logUpdate = "Error: Could not perform command, \n device is ramping";
 
 			// Handles commands when the device is on
-		} else if (device.isOn()) {
+		} else if (device.isOn() && !device.isRamping()) {
 			if (input.getName().equals("on")) {
 				logUpdate = "Error: Device is already ON";
 			} else if (input.getName().equals("setTime")) {
@@ -114,7 +114,7 @@ public class WorkerRunnable implements Runnable {
 						} else {
 							device.execute(input.getName(), new Object[] { msecs });
 							logUpdate = "Current ramping";
-							cvf = new CurrentValueFinder();
+							CurrentValueFinder cvf = new CurrentValueFinder();
 							cvf.execute();
 						}
 					}
@@ -140,12 +140,11 @@ public class WorkerRunnable implements Runnable {
 
 			} else if (input.getName().equals("loadRamp")) {
 				String[] array = input.getParamters()[0].toString().split("[,\\s]+");
-				Object[] rampValues = new Object[array.length];
+				rampValues = new Object[array.length];
 				if (isAllDouble(array)) {
 					for (int i = 0; i < rampValues.length; i++) {
 						rampValues[i] = Double.parseDouble(array[i]);
 					}
-					this.rampValues = rampValues;
 					device.execute(input.getName(), rampValues);
 					logUpdate = "Ramp values loaded";
 				} else {
@@ -164,6 +163,7 @@ public class WorkerRunnable implements Runnable {
 		changes[4] = isConnected;
 
 		lastCommand = input;
+
 		return changes;
 	}
 
@@ -171,11 +171,11 @@ public class WorkerRunnable implements Runnable {
 		@Override
 		protected Void doInBackground() throws Exception {
 			for (int i = 0; i <= rampValues.length; i++) {
-				currentValue = device.execute("current_get", new Object[] {}).toString();
-				Thread.sleep(msecs);
-				if (i == rampValues.length - 1) {
+				if (i == rampValues.length) {
 					finishedRamping = true;
+					logUpdate = "Ramping completed";
 				}
+				Thread.sleep(msecs);
 			}
 			return null;
 		}
@@ -185,8 +185,6 @@ public class WorkerRunnable implements Runnable {
 		String value;
 		if (!device.isOn()) {
 			value = "";
-		} else if (device.isOn() && device.isRamping()) {
-			value = currentValue;
 		} else {
 			value = device.execute("current_get", null).toString();
 		}

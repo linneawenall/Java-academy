@@ -46,7 +46,6 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			throw new NullPointerException("The array of values is empty");
 		}
 		if (power) {
-			Arrays.sort(rampValues);
 			this.rampValues = new double[rampValues.length];
 			System.arraycopy(rampValues, 0, this.rampValues, 0, rampValues.length);
 			for (int i = 0; i <= rampValues.length - 1; i++) {
