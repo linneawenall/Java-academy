@@ -2,6 +2,8 @@
 import java.awt.Color;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.WindowAdapter;
+import java.awt.event.WindowEvent;
 import java.io.BufferedReader;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -26,33 +28,35 @@ import javax.swing.JTextField;
 import javax.swing.SwingWorker;
 
 public class PanelClient implements ActionListener {
-	private DeviceNarrow device;
-	private int msecs;
+
 	private JLabel currentLabel, deviceLabel, descriptionLabel, setLabel, rampLabel, timeLabel, startLabel,
 			rampStatusLabel;
 	private ImageIcon deviceIcon;
 	private ImageIcon rampIcon;
 	private JTextArea logArea;
-	private String[] array;
+
 	private JButton onButton, offButton, resetButton, startButton;
 	private JTextField timeText, setText, rampText;
-	// private CurrentValueFinder cvf;
 
 	// Connection
 	private static Socket clientSocket;
 	private static final int PORT = 4444;
 
-	// private static String fromServer;
-	private Command fromUser;
+	private static Command fromUser;
 	private Object[] fromServer;
-
-	private Object[] params;
-
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
 		frame.setSize(265, 497);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+		frame.addWindowListener(new WindowAdapter() {
+			@Override
+			public void windowClosing(WindowEvent e) {
+				fromUser = new Command("disconnect", null);
+				e.getWindow().dispose();
+			}
+		});
 
 		JPanel panel = new JPanel();
 		panel.setBackground(Color.decode("#CCCCFF"));
@@ -65,14 +69,8 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void initConnection() throws ClassNotFoundException {
-		String hostName = "localhost";
-		int portNumber = Integer.parseInt("4444");
-
-		// if (fromServer.equals("off"))
-		// break;
-
 		try {
-			clientSocket = new Socket(hostName, portNumber);
+			clientSocket = new Socket("localhost", PORT);
 
 			ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
 			ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
@@ -80,32 +78,24 @@ public class PanelClient implements ActionListener {
 			fromUser = new Command("started", null);
 
 			while ((fromServer = (Object[]) in.readObject()) != null) {
-				System.out.println("What does server say?");
-				for (int i = 0; i < fromServer.length; i++) {
-					System.out.print(" index[" + i + "] is " + fromServer[i]);
-
-				}
-				if(fromServer[4].equals(false)){
+				if (fromServer.length == 1) {
+					logArea.append(fromServer[0].toString());
 					break;
 				}
-
-				System.out.println("");
 				updateGUI(fromServer);
+				if (fromServer[4].equals(false)) {
+					break;
+				}
 				if (fromUser != null) {
-					System.out.println("In if statement");
-
-			
-
-					System.out.println("Client: " + fromUser.getName());
 					out.writeObject(fromUser);
 				}
 			}
 
 		} catch (UnknownHostException e) {
-			System.err.println("Don't know about host " + hostName);
+			System.err.println("Don't know about host localhost ");
 			System.exit(1);
 		} catch (IOException e) {
-			System.err.println("Couldn't get I/O for the connection to " + hostName);
+			System.err.println("Couldn't get I/O for the connection to localhost ");
 			System.exit(1);
 		}
 	}
@@ -113,54 +103,31 @@ public class PanelClient implements ActionListener {
 	@Override
 	public void actionPerformed(final ActionEvent evt) {
 
-		// Power on
 		if (evt.getSource().equals(onButton)) {
 			fromUser = new Command("on", null);
-			System.out.println("On button pushed");
+
 		} else if (evt.getSource().equals(offButton)) {
 			fromUser = new Command("off", null);
-			System.out.println("Off button pushed");
+
 		} else if (evt.getSource().equals(resetButton)) {
 			fromUser = new Command("reset", null);
-			System.out.println("Reset button pushed");
+
 		} else if (evt.getSource().equals(setText)) {
-			//if (isDouble(setText.getText())) {
-				fromUser = new Command("current_set", new Object[] { Double.parseDouble(setText.getText()) });
-				System.out.println("Current setText fired");
-//			} else {
-//				// Should come from server
-//				logArea.append("Only numbers");
-//			}
+			fromUser = new Command("current_set", new Object[] { setText.getText() });
+
 		} else if (evt.getSource().equals(rampText)) {
-			array = rampText.getText().split("[,\\s]+");
-			Object[] rampValues = new Object[array.length];
-//			if (isAllDouble(array)) {
-//				for (int i = 0; i < rampValues.length; i++) {
-//					rampValues[i] = Double.parseDouble(array[i]);
-//				}
-				fromUser = new Command("loadRamp", array);
-//			} else {
-//				// Should come from Server
-//				logArea.append("Only numbers");
-//			}
+			fromUser = new Command("loadRamp", new Object[] { rampText.getText() });
+
 		} else if (evt.getSource().equals(timeText)) {
-			// These things should be done in WorkerRunnable
-//			if (isInteger(timeText.getText())) {
-//				msecs = Integer.parseInt(timeText.getText());
-//				logArea.append("Ramping time set to: " + msecs + " msecs \n");
-//			} else {
-//				logArea.append("Error: Only one number accepted \n");
-//
-//			}
-			fromUser = new Command("setTime", new Object[]{timeText.getText()});
+			fromUser = new Command("setTime", new Object[] { timeText.getText() });
+
 		} else if (evt.getSource().equals(startButton)) {
-			fromUser = new Command("startRamp", new Object[] { msecs });
+			fromUser = new Command("startRamp", null);
 
 		}
 	}
 
 	public PanelClient() throws FileNotFoundException {
-		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		deviceIcon = createImageIcon("/red.png", "Red dot");
 		rampIcon = createImageIcon("/red.png", "Red dot");
 
@@ -324,7 +291,6 @@ public class PanelClient implements ActionListener {
 
 	}
 
-	/** Returns an ImageIcon, or null if the path was invalid. */
 	protected ImageIcon createImageIcon(String path, String description) {
 		java.net.URL imgURL = getClass().getResource(path);
 		if (imgURL != null) {
@@ -344,45 +310,13 @@ public class PanelClient implements ActionListener {
 		return red;
 	}
 
-
-//	private boolean isDouble(String number) throws NumberFormatException {
-//		try {
-//			Double.parseDouble(number);
-//		} catch (NumberFormatException e) {
-//			return false;
-//		}
-//		return true;
-//	}
-//
-//	private boolean isAllDouble(String[] array) {
-//		for (int i = 0; i < array.length; i++) {
-//			if (!isDouble(array[i])) {
-//				return false;
-//			}
-//		}
-//		return true;
-//	}
-//
-//	private boolean isInteger(String number) throws NumberFormatException {
-//		try {
-//			Integer.parseInt(number);
-//		} catch (NumberFormatException e) {
-//			return false;
-//		}
-//		return true;
-//	}
-
 	public void updateGUI(Object[] fromServer) {
 		if ((String) fromServer[0] != null) {
-			System.out.println("UdtateGUI: currentLabel " + (String) fromServer[0]);
 			currentLabel.setText((String) fromServer[0]);
 		}
 		if ((String) fromServer[1] != null) {
-			System.out.println("UdtateGUI: logArea " + (String) fromServer[1]);
 			logArea.append((String) fromServer[1] + "\n");
 		}
-
-		System.out.println("UpdateGUI: icon " + fromServer[2]);
 		deviceLabel.setIcon(whichIcon((boolean) fromServer[2]));
 		rampStatusLabel.setIcon(whichIcon((boolean) fromServer[3]));
 

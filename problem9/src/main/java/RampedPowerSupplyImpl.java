@@ -35,10 +35,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 
 	/* Will set the current in the power supply to the given value. */
 	public void set(double value) throws IllegalStateException {
-//		if (!isRamping()) {
-			super.set(value);
-//		} else
-//			throw new IllegalStateException("Can not set value, power is ramping");
+		super.set(value);
 
 	}
 
@@ -92,11 +89,11 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 			System.out.println("Ramper is running");
 			for (int i = 0; i <= rampValues.length - 1; i++) {
 				try {
-					System.out.println("Loop number: " + i); // Here it only loops the first time. Why?
+					System.out.println("Loop number: " + i); 
 					set(rampValues[i]);
 					if (i == rampValues.length - 1) {
 						ramping = false;
-						System.out.println("Ramping boolean is " +ramping);
+						System.out.println("Ramping boolean is " + ramping);
 					}
 					Thread.sleep(msecs);
 
@@ -111,7 +108,5 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 	public boolean isOn() {
 		return super.isOn();
 	}
-	
-
 
 }

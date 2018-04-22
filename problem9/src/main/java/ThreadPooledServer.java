@@ -3,6 +3,8 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.io.FileNotFoundException;
 import java.io.IOException;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -13,6 +15,7 @@ public class ThreadPooledServer implements Runnable {
 	protected boolean isStopped = false;
 	protected Thread runningThread = null;
 	protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
+	protected int nbrClients;
 
 	public ThreadPooledServer(int port) {
 		this.serverPort = port;
@@ -27,7 +30,7 @@ public class ThreadPooledServer implements Runnable {
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		System.out.println("ThreadPooledServer Main method: Stopping Server");
+		System.out.println("ThreadPooledServer: Stopping Server");
 		server.stop();
 	}
 
@@ -41,15 +44,30 @@ public class ThreadPooledServer implements Runnable {
 			Socket clientSocket = null;
 			try {
 				System.out.println("ThreadPooledServer: waiting for clientSocket");
+
 				clientSocket = this.serverSocket.accept();
 			} catch (IOException e) {
 				if (isStopped()) {
-					System.out.println("ThreadPooledServer IOException and isStopped()=true: Server Stopped.");
+					System.out.println("Server Stopped.");
 					break;
 				}
 				throw new RuntimeException("ThreadPooledServer: Error accepting client connection", e);
 			}
-			this.threadPool.execute(new WorkerRunnable(clientSocket, "Thread Pooled Server"));
+			boolean canConnect = (nbrClients < 1 ? true : false);
+			if (canConnect) {
+				nbrClients = 1;
+				this.threadPool.execute(new WorkerRunnable(clientSocket, "Thread Pooled Server"));
+			} else {
+				try {
+
+					ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect" });
+					System.out.println("New client can't connect");
+
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 		}
 		this.threadPool.shutdown();
 		System.out.println("ThreadPooledServer run() method: Server Stopped.");
