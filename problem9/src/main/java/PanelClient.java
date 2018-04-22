@@ -48,7 +48,6 @@ public class PanelClient implements ActionListener {
 
 	private Object[] params;
 
-	private Command lastCommand = null;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
@@ -86,13 +85,16 @@ public class PanelClient implements ActionListener {
 					System.out.print(" index[" + i + "] is " + fromServer[i]);
 
 				}
+				if(fromServer[4].equals(false)){
+					break;
+				}
 
 				System.out.println("");
 				updateGUI(fromServer);
 				if (fromUser != null) {
 					System.out.println("In if statement");
 
-					lastCommand = fromUser;
+			
 
 					System.out.println("Client: " + fromUser.getName());
 					out.writeObject(fromUser);
@@ -122,34 +124,35 @@ public class PanelClient implements ActionListener {
 			fromUser = new Command("reset", null);
 			System.out.println("Reset button pushed");
 		} else if (evt.getSource().equals(setText)) {
-			if (isDouble(setText.getText())) {
+			//if (isDouble(setText.getText())) {
 				fromUser = new Command("current_set", new Object[] { Double.parseDouble(setText.getText()) });
 				System.out.println("Current setText fired");
-			} else {
-				// Should come from server
-				logArea.append("Only numbers");
-			}
+//			} else {
+//				// Should come from server
+//				logArea.append("Only numbers");
+//			}
 		} else if (evt.getSource().equals(rampText)) {
 			array = rampText.getText().split("[,\\s]+");
 			Object[] rampValues = new Object[array.length];
-			if (isAllDouble(array)) {
-				for (int i = 0; i < rampValues.length; i++) {
-					rampValues[i] = Double.parseDouble(array[i]);
-				}
-				fromUser = new Command("loadRamp", rampValues);
-			} else {
-				// Should come from Server
-				logArea.append("Only numbers");
-			}
+//			if (isAllDouble(array)) {
+//				for (int i = 0; i < rampValues.length; i++) {
+//					rampValues[i] = Double.parseDouble(array[i]);
+//				}
+				fromUser = new Command("loadRamp", array);
+//			} else {
+//				// Should come from Server
+//				logArea.append("Only numbers");
+//			}
 		} else if (evt.getSource().equals(timeText)) {
 			// These things should be done in WorkerRunnable
-			if (isInteger(timeText.getText())) {
-				msecs = Integer.parseInt(timeText.getText());
-				logArea.append("Ramping time set to: " + msecs + " msecs \n");
-			} else {
-				logArea.append("Error: Only one number accepted \n");
-
-			}
+//			if (isInteger(timeText.getText())) {
+//				msecs = Integer.parseInt(timeText.getText());
+//				logArea.append("Ramping time set to: " + msecs + " msecs \n");
+//			} else {
+//				logArea.append("Error: Only one number accepted \n");
+//
+//			}
+			fromUser = new Command("setTime", new Object[]{timeText.getText()});
 		} else if (evt.getSource().equals(startButton)) {
 			fromUser = new Command("startRamp", new Object[] { msecs });
 
@@ -332,14 +335,6 @@ public class PanelClient implements ActionListener {
 		}
 	}
 
-	// private ImageIcon whichIcon(String command) {
-	// ImageIcon red = createImageIcon("/red.png", "Red dot");
-	// ImageIcon green = createImageIcon("/green.png", "Green dot");
-	// if (command.equals("on") || command.equals("startRamp")) {
-	// return green;
-	// }
-	// return red;
-	// }
 	private ImageIcon whichIcon(boolean isOn) {
 		ImageIcon red = createImageIcon("/red.png", "Red dot");
 		ImageIcon green = createImageIcon("/green.png", "Green dot");
@@ -349,54 +344,33 @@ public class PanelClient implements ActionListener {
 		return red;
 	}
 
-	// private void runCurrent() {
-	// rampStatusLabel.setIcon(whichIcon(true));
-	// cvf = new CurrentValueFinder();
-	// cvf.execute();
-	// }
-	//
-	// private class CurrentValueFinder extends SwingWorker<Void, Void> {
-	// @Override
-	// protected Void doInBackground() throws Exception {
-	// for (int i = 0; i <= array.length; i++) {
-	// currentLabel.setText(device.execute("current_get", new Object[]
-	// {}).toString());
-	// Thread.sleep(msecs);
-	// if (i == array.length - 1) {
-	// rampStatusLabel.setIcon(whichIcon(false));
-	// logArea.append("Ramping completed \n");
-	// }
-	// }
-	// return null;
-	// }
-	// };
 
-	private boolean isDouble(String number) throws NumberFormatException {
-		try {
-			Double.parseDouble(number);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-
-	private boolean isAllDouble(String[] array) {
-		for (int i = 0; i < array.length; i++) {
-			if (!isDouble(array[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean isInteger(String number) throws NumberFormatException {
-		try {
-			Integer.parseInt(number);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
+//	private boolean isDouble(String number) throws NumberFormatException {
+//		try {
+//			Double.parseDouble(number);
+//		} catch (NumberFormatException e) {
+//			return false;
+//		}
+//		return true;
+//	}
+//
+//	private boolean isAllDouble(String[] array) {
+//		for (int i = 0; i < array.length; i++) {
+//			if (!isDouble(array[i])) {
+//				return false;
+//			}
+//		}
+//		return true;
+//	}
+//
+//	private boolean isInteger(String number) throws NumberFormatException {
+//		try {
+//			Integer.parseInt(number);
+//		} catch (NumberFormatException e) {
+//			return false;
+//		}
+//		return true;
+//	}
 
 	public void updateGUI(Object[] fromServer) {
 		if ((String) fromServer[0] != null) {

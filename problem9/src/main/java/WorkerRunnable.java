@@ -24,10 +24,12 @@ public class WorkerRunnable implements Runnable {
 	private Object[] changes;
 	private Object[] rampValues;
 
-	String currentValue = null;
-	String logUpdate = null;
-	Boolean isOn = null;
-	Boolean isRamping = null;
+	private String currentValue = null;
+	private String logUpdate = null;
+	private Boolean isOn = null;
+	private Boolean isRamping = null;
+	private boolean finishedRamping = false;
+	private boolean isConnected = false;
 
 	private CurrentValueFinder cvf;
 	private int msecs;
@@ -56,133 +58,99 @@ public class WorkerRunnable implements Runnable {
 			ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
 			objectOut.writeObject(changes);
 
-			cvf = new CurrentValueFinder();
-
 			while ((inputCommand = (Command) objectIn.readObject()) != null) {
-				// if (inputCommand!=lastCommand) {
-				System.out.println("In if loop with inputCommand: " + inputCommand.getName());
 				changes = processInput(inputCommand);
-				// lastCommand = inputCommand;
 				objectOut.writeObject(changes);
-				// }
 
 			}
-		} catch (IOException e) {
-			e.printStackTrace();
-		} catch (ClassNotFoundException e) {
-			// TODO Auto-generated catch block
+		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	public Object[] processInput(Command input) {
-		changes = new Object[4];
+		changes = new Object[5];
+
+		// Checks if the while loop sends the same command again
 		if (input.equals(lastCommand)) {
+			if (finishedRamping) {
+				logUpdate = "Ramping completed";
+				finishedRamping = false;
+			} else {
+				logUpdate = null;
+			}
 
-
-			changes[0] = currentValue;
-			changes[1] = null;
-			changes[2] = isOn;
-			changes[3] = isRamping;
-
-			lastCommand = input;
-			return changes;
-
+			// Set's up initial while loop connection
 		} else if (input.getName().equals("started")) {
-			System.out.println("Starting server in processInput");
-			currentValue = "";
-			logUpdate = "Connection established with server";
-			isOn = false;
-			isRamping = false;
-		} else if (input.getName().equals("on")) {
-			if (!device.isOn()) {
-				device.execute("on", input.getParamters());
+			if (!isConnected) {
+				logUpdate = "Connection established with server";
+			} else {
+				logUpdate = null;
+			}
+			isConnected = true;
+
+			// Handles commands when the device is off
+		} else if (!device.isOn()) {
+			if (input.getName().equals("on")) {
+				device.execute(input.getName(), input.getParamters());
+				logUpdate = "Device is turned ON";
 				currentValue = device.execute("current_get", null).toString();
-				logUpdate = "Device is ON";
-				isOn = device.isOn();
-				isRamping = false;
-			} else {
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				logUpdate = "Error: Device is already turned ON, request ignored ";
-				isOn = device.isOn();
-				isRamping = false;
-			}
-		} else if (input.getName().equals("off")) {
-			if (device.isOn()) {
-				device.execute("off", input.getParamters());
-				currentValue = "";
-				logUpdate = "Device is turned OFF";
-				isOn = device.isOn();
-				isRamping = false;
 			} else {
 				currentValue = "";
-				logUpdate = "";
-				isOn = false;
-				isRamping = false;
+				logUpdate = "Could not perform command, power is OFF";
 			}
-		} else if (input.getName().equals("reset")) {
-			if (device.isOn()) {
+//GET BACK HERE _ MAKE SERVER HANDLE CHECKING IF PARAMETERS ARE NUMBERS ETC
+			// Handles commands when the device is on
+		} else if (device.isOn()) {
+			if (input.getName().equals("on")) {
+				logUpdate = "Device is already ON, request ignored";
+			} else if (input.getName().equals("setTime")) {
+				if (isInteger((String) input.getParamters()[0])) {
+					msecs = Integer.parseInt((String) input.getParamters()[0]);
+					logUpdate = "Ramping time set to: " + msecs + " msecs \n";
+				} else {
+					logUpdate = "Error: Only one number accepted \n";
+				}
+			} else if (input.getName().equals("startRamp")) {
+				if (!device.isRamping()) {
+					if (rampValues == null) {
+						logUpdate = "Ramp values have not been loaded";
+					} else {
+						msecs = (int) input.getParamters()[0];
+						if (msecs == 0) {
+							logUpdate = "No ramping time has been given";
+						} else {
+							device.execute(input.getName(), new Object[] { msecs });
+							logUpdate = "Current ramping";
+							cvf = new CurrentValueFinder();
+							cvf.execute();
+						}
+					}
+				}
+			} else {
+				device.execute(input.getName(), input.getParamters());
+			}
+			if (input.getName().equals("off")) {
+				logUpdate = "Device is turned OFF \n & disconnected from server";
+				isConnected = false;
+
+			} else if (input.getName().equals("reset")) {
 				rampValues = input.getParamters();
-				device.execute("reset", input.getParamters());
-				currentValue = device.execute("current_get", input.getParamters()).toString();
 				logUpdate = "Current was reset";
-				isOn = device.isOn();
-				isRamping = false;
-			} else {
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				logUpdate = "Could not reset, power is OFF";
-				isOn = device.isOn();
-				isRamping = false;
-			}
-		} else if (input.getName().equals("current_set")) {
-			if (device.isOn()) {
-				device.execute("current_set", input.getParamters());
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				String value = (String) input.getParamters()[0].toString();
-				logUpdate = "Current was set to " + value;
-				isOn = device.isOn();
-				isRamping = false;
-			} else {
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				logUpdate = "Could not set, power is OFF";
-				isOn = device.isOn();
-				isRamping = false;
-			}
-		} else if (input.getName().equals("loadRamp")) {
-			if (device.isOn()) {
+
+			} else if (input.getName().equals("current_set")) {
+				logUpdate = "Current was set to" + currentValue;
+
+			} else if (input.getName().equals("loadRamp")) {
 				rampValues = input.getParamters();
-				device.execute("loadRamp", input.getParamters());
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				String value = (String) input.getParamters()[0].toString();
-				logUpdate = "Current was set to " + value;
-				isOn = device.isOn();
-				isRamping = false;
-			} else {
-				currentValue = device.execute("current_get", input.getParamters()).toString();
-				logUpdate = "Could not set, power is OFF";
-				isOn = device.isOn();
-				isRamping = false;
-			}
-		} else if (input.getName().equals("startRamp")) {
-			if ((device.isOn() & !device.isRamping())) {
-				msecs = (int) input.getParamters()[0];
-				System.out.println("In first if statement for startramp");
-				device.execute("startRamp", new Object[] { msecs });
-
-				logUpdate = "Current ramping";
-				isOn = true;
-
-				cvf = new CurrentValueFinder();
-				cvf.execute();
-
+				logUpdate = "Ramp values loaded";
 			}
 		}
-
-		changes[0] = currentValue;
+		changes[0] = getCurrentValue();
 		changes[1] = logUpdate;
-		changes[2] = isOn;
-		changes[3] = isRamping;
+		changes[2] = device.isOn();
+		changes[3] = device.isRamping();
+		changes[4] = isConnected;
 
 		lastCommand = input;
 		return changes;
@@ -193,14 +161,81 @@ public class WorkerRunnable implements Runnable {
 		protected Void doInBackground() throws Exception {
 			for (int i = 0; i <= rampValues.length; i++) {
 				currentValue = device.execute("current_get", new Object[] {}).toString();
-				isRamping = true;
 				Thread.sleep(msecs);
 				if (i == rampValues.length - 1) {
-					isRamping = false;
-					logUpdate = "Ramping completed \n";
+					finishedRamping = true;
 				}
 			}
 			return null;
 		}
 	};
+
+	private String getCurrentValue() {
+		String value;
+		if (!device.isOn()) {
+			value = "";
+		} else if (device.isOn() && device.isRamping()) {
+			value = currentValue;
+		} else {
+			value = device.execute("current_get", null).toString();
+		}
+		return value;
+	}
+
+	// if (isDouble(setText.getText())) {
+	// fromUser = new Command("current_set", new Object[] {
+	// Double.parseDouble(setText.getText()) });
+	// System.out.println("Current setText fired");
+	// } else {
+	// // Should come from server
+	// logArea.append("Only numbers");
+	// }
+	// } else if (evt.getSource().equals(rampText)) {
+	// array = rampText.getText().split("[,\\s]+");
+	// Object[] rampValues = new Object[array.length];
+	// if (isAllDouble(array)) {
+	// for (int i = 0; i < rampValues.length; i++) {
+	// rampValues[i] = Double.parseDouble(array[i]);
+	// }
+	// fromUser = new Command("loadRamp", rampValues);
+	// } else {
+	// // Should come from Server
+	// logArea.append("Only numbers");
+	// }
+	// } else if (evt.getSource().equals(timeText)) {
+	// // These things should be done in WorkerRunnable
+	// if (isInteger(timeText.getText())) {
+	// msecs = Integer.parseInt(timeText.getText());
+	// logArea.append("Ramping time set to: " + msecs + " msecs \n");
+	// } else {
+	// logArea.append("Error: Only one number accepted \n");
+	//
+	// }
+
+	private boolean isDouble(String number) throws NumberFormatException {
+		try {
+			Double.parseDouble(number);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
+
+	private boolean isAllDouble(String[] array) {
+		for (int i = 0; i < array.length; i++) {
+			if (!isDouble(array[i])) {
+				return false;
+			}
+		}
+		return true;
+	}
+
+	private boolean isInteger(String number) throws NumberFormatException {
+		try {
+			Integer.parseInt(number);
+		} catch (NumberFormatException e) {
+			return false;
+		}
+		return true;
+	}
 }

@@ -96,6 +96,7 @@ public class RampedPowerSupplyImpl extends PowerSupplyImpl implements RampedPowe
 					set(rampValues[i]);
 					if (i == rampValues.length - 1) {
 						ramping = false;
+						System.out.println("Ramping boolean is " +ramping);
 					}
 					Thread.sleep(msecs);
 
