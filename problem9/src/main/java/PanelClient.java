@@ -23,9 +23,11 @@ import javax.swing.JButton;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingWorker;
+import javax.swing.text.DefaultCaret;
 
 public class PanelClient implements ActionListener {
 
@@ -152,6 +154,16 @@ public class PanelClient implements ActionListener {
 		panel.add(makeStartLabel());
 		panel.add(makeRampStatusLabel());
 		panel.add(makeLogArea());
+		
+		JScrollPane scrollPane = new JScrollPane();
+scrollPane.setViewportView(logArea);
+        
+        // Auto scrolls to the bottom of the {@code logScreen}
+		DefaultCaret caret = (DefaultCaret)logArea.getCaret();
+        caret.setUpdatePolicy(DefaultCaret.ALWAYS_UPDATE);
+        
+        panel.add(scrollPane);
+		
 
 	}
 
