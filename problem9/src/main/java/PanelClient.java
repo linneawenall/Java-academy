@@ -76,6 +76,13 @@ public class PanelClient implements ActionListener {
 
 			Object[] fromServer = null;
 
+			// REVIEW (high): I'm glad this successfully sends the data to the server and receives replies from it. :)
+			// Unfortunately its implementation is not very pretty. First of all, is there any reason you are constantly
+			// reading the responses from the server in a while loop here?
+			// I would expect the sending procedure to be as follows:
+			// 1.) send the command and parameters to the server using the "out" stream you create at the beginning of
+			// this method.
+			// 2.) read the response from the server using the "in" stream you created at the beginning of this method.
 			while ((fromServer = (Object[]) in.readObject()) != null) {
 				if (fromServer.length == 1) {
 					logArea.append(fromServer[0].toString());

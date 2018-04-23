@@ -82,7 +82,12 @@ public class WorkerRunnable implements Runnable {
 			isConnected = true;
 
 			// Handles commands when the device is off
-		} else if (!device.isOn()) {
+		}
+		// REVIEW (high): the "else if" statements below don't make much sense. Instead you should simply forward
+		// the requests to "NarrowRampedPowerSupplyImpl" class, like you did below:
+		// device.execute(input.getName(), input.getParamters());
+		// The "NarrowRampedPowerSupplyImpl" will throw exception if the proper conditions are not met.
+		else if (!device.isOn()) {
 			if (input.getName().equals("on")) {
 				device.execute(input.getName(), input.getParamters());
 				logUpdate = "Device is turned ON";
@@ -120,6 +125,9 @@ public class WorkerRunnable implements Runnable {
 					}
 				}
 			}
+			// REVIEW (high): similar to the review comment above. Why do you use the "if" statement?
+			// Simply forwarding request to "NarrowRampedPowerSupplyImpl" using
+			// "device.execute(input.getName(), input.getParamters());" should be enough.
 			if (input.getName().equals("off")) {
 				logUpdate = "Device is turned OFF";
 				device.execute(input.getName(), input.getParamters());
