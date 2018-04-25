@@ -128,9 +128,7 @@ public class MakeComponents {
 					currentLabel.setText(device.execute("current_get", new Object[] {}).toString());
 					logArea.append("Current reset to: " + currentLabel.getText() + "\n");
 				} catch (IllegalStateException e1) {
-					// REVIEW (high): the line below causes compile-time error on my computer:
-					// Error:(131, 89) java: unmappable character (0xB4) for encoding UTF-8
-					logArea.append("Error: Device is turned off, can�t reset value.\n");
+					logArea.append("Error: Device is turned off, can't reset value.\n");
 				}
 			}
 

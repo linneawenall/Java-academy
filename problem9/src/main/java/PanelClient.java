@@ -39,8 +39,12 @@ public class PanelClient implements ActionListener {
 	// Connection
 	private static Socket clientSocket;
 	private static final int PORT = 4444;
+	private boolean isConnected;
+	private ObjectOutputStream out;
+	private ObjectInputStream in;
 
 	private static Command fromUser;
+	private Object[] fromServer;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
@@ -67,61 +71,44 @@ public class PanelClient implements ActionListener {
 
 	public void initConnection() throws ClassNotFoundException {
 		try {
-			clientSocket = new Socket("localhost", PORT);
+			System.out.println("InitConnection");
 
-			ObjectOutputStream out = new ObjectOutputStream(clientSocket.getOutputStream());
-			ObjectInputStream in = new ObjectInputStream(clientSocket.getInputStream());
+			clientSocket = new Socket("localhost", PORT);
+			System.out.println("ClientSocket initiated");
+
+			out = new ObjectOutputStream(clientSocket.getOutputStream());
+			System.out.println("out created");
+
+			in = new ObjectInputStream(clientSocket.getInputStream());
+			System.out.println("in created");
 
 			fromUser = new Command("started", null);
+			readAndUpdate();
 
-			Object[] fromServer = null;
-
-			// REVIEW (high): I'm glad this successfully sends the data to the
-			// server and receives replies from it. :)
-			// Unfortunately its implementation is not very pretty. First of
-			// all, is there any reason you are constantly
-			// reading the responses from the server in a while loop here?
-			// I would expect the sending procedure to be as follows:
-			// 1.) send the command and parameters to the server using the "out"
-			// stream you create at the beginning of
-			// this method.
-			// 2.) read the response from the server using the "in" stream you
-			// created at the beginning of this method.
-
-			// This is the reason why I emailed you in the first place. I
-			// couldn't get it to stay connected without the while loop and by
-			// looking at these examples:
-			// https://docs.oracle.com/javase/tutorial/networking/sockets/examples/KnockKnockClient.java,
-			// https://docs.oracle.com/javase/tutorial/networking/sockets/examples/KnockKnockProtocol.java,
-			// https://docs.oracle.com/javase/tutorial/networking/sockets/examples/KnockKnockServer.java
-			// then a while loop looks like the way to do it. If you have any
-			// other ideas, feel free to share, because I spent 10 hours on this
-			// part and time is precious :)
-
-			// REVIEW RESPONSE: in general, all sockets stay connected until either client or server side close them
-			// (by calling the "close()" method on the socket). So if your connection is unable to stay open, check
-			// if you don't close it unintentionally in some part of the code.
-			
-			while ((fromServer = (Object[]) in.readObject()) != null) {
-				if (fromServer.length == 1) {
-					logArea.append(fromServer[0].toString());
-					break;
-				}
-				updateGUI(fromServer);
-				if (fromServer[4].equals(false)) {
-					break;
-				}
-				if (fromUser != null) {
-					out.writeObject(fromUser);
-				}
-			}
-			clientSocket.close();
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
 			System.exit(1);
 		} catch (IOException e) {
 			System.err.println("Couldn't get I/O for the connection to localhost ");
 			System.exit(1);
+		}
+	}
+
+	public void readAndUpdate() {
+		try {
+			fromServer = (Object[]) in.readObject();
+			for (int i = 0; i < fromServer.length; i++) {
+				System.out.println("Value at index " + i + " is " + fromServer[i]);
+			}
+			if (fromServer.length == 1) {
+				logArea.append(fromServer[0].toString());
+				clientSocket.close();
+			}
+			updateGUI(fromServer);
+			
+
+		} catch (ClassNotFoundException | IOException e) {
+			e.printStackTrace();
 		}
 	}
 
@@ -138,18 +125,23 @@ public class PanelClient implements ActionListener {
 			fromUser = new Command("reset", null);
 
 		} else if (evt.getSource().equals(setText)) {
-			fromUser = new Command("current_set", new Object[] { setText.getText() });
+			fromUser = new Command("current_set", new String[] { setText.getText() });
 
 		} else if (evt.getSource().equals(rampText)) {
-			fromUser = new Command("loadRamp", new Object[] { rampText.getText() });
-
-		} else if (evt.getSource().equals(timeText)) {
-			fromUser = new Command("setTime", new Object[] { timeText.getText() });
+			String[] array = rampText.getText().split("[,\\s]+");
+			fromUser = new Command("loadRamp", array);
 
 		} else if (evt.getSource().equals(startButton)) {
-			fromUser = new Command("startRamp", null);
+			fromUser = new Command("startRamp", new String[] { timeText.getText() });
 
 		}
+		try {
+			System.out.println("command sent " + fromUser.getName());
+			out.writeObject(fromUser);
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		readAndUpdate();
 	}
 
 	public PanelClient() throws FileNotFoundException {
@@ -291,7 +283,7 @@ public class PanelClient implements ActionListener {
 		timeText = new JTextField(20);
 		timeText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		timeText.setBounds(10, 220, 120, 25);
-		timeText.addActionListener(this);
+		// timeText.addActionListener(this);
 		return timeText;
 	}
 
@@ -350,14 +342,17 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void updateGUI(Object[] fromServer) {
+		System.out.println("Updating GUI");
 		if ((String) fromServer[0] != null) {
 			currentLabel.setText((String) fromServer[0]);
 		}
 		if ((String) fromServer[1] != null) {
+			//System.out.println((String) fromServer[1]);
 			logArea.append((String) fromServer[1] + "\n");
 		}
 		deviceLabel.setIcon(whichIcon((boolean) fromServer[2]));
 		rampStatusLabel.setIcon(whichIcon((boolean) fromServer[3]));
+		isConnected = (boolean) fromServer[4];
 
 	}
 }

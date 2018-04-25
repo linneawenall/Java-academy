@@ -23,7 +23,7 @@ public class Circuit {
 		failureTest(deviceName);
 	}
 
-	public Object execute(String deviceName, String command, Object[] params) throws IllegalArgumentException {
+	public Object execute(String deviceName, String command, String[] params) throws IllegalArgumentException {
 		if (deviceName == null || deviceName.isEmpty()) {
 			throw new NullPointerException("DeviceName is empty or null");
 		} else if (!hp.containsKey(deviceName)) {
@@ -37,8 +37,8 @@ public class Circuit {
 	}
 
 	private void failureTest(String deviceName) {
-		if (!((boolean) execute(deviceName, "on", new Object[] {}))
-				|| !(boolean) execute(deviceName, "off", new Object[] {})) {
+		if (!((boolean) execute(deviceName, "on", new String[] {}))
+				|| !(boolean) execute(deviceName, "off", new String[] {})) {
 			failureDevices.add(deviceName);
 		}
 	}

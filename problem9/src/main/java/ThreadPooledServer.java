@@ -25,13 +25,13 @@ public class ThreadPooledServer implements Runnable {
 		ThreadPooledServer server = new ThreadPooledServer(4444);
 		new Thread(server).start();
 
-		try {
-			Thread.sleep(20 * 1000);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		System.out.println("ThreadPooledServer: Stopping Server");
-		server.stop();
+//		try {
+//			Thread.sleep(20 * 1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
+//		System.out.println("ThreadPooledServer: Stopping Server");
+//		server.stop();
 	}
 
 	public void run() {

@@ -9,10 +9,10 @@ public class Command implements Serializable {
 	private static final long serialVersionUID = 2334595196329179652L;
 	
 	private String commandName;
-	private Object[] commandParameters;
+	private String[] commandParameters;
 	
 	
-	public Command(String commandName, Object[] commandParamters) {
+	public Command(String commandName, String[] commandParamters) {
 		this.commandName = commandName;
 		this.commandParameters = commandParamters;
 	}
@@ -21,7 +21,7 @@ public class Command implements Serializable {
 		return commandName;
 	}
 	
-	public Object[] getParamters() {
+	public String[] getParamters() {
 		return commandParameters;
 	}
 

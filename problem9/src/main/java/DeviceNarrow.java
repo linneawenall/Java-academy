@@ -7,7 +7,7 @@
 public interface DeviceNarrow {
 
 
-	public Object execute (String command, Object [] params);
+	public Object execute (String command, String [] params);
 	
 	public boolean isOn();
 

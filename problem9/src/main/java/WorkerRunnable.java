@@ -24,6 +24,11 @@ public class WorkerRunnable implements Runnable {
 
 	private Command lastCommand = null;
 
+	private ObjectOutputStream objectOut;
+
+	private String currentValue;
+	private boolean isRamping;
+
 	public WorkerRunnable(Socket clientSocket, String serverText) {
 		this.clientSocket = clientSocket;
 		this.serverText = serverText;
@@ -36,174 +41,111 @@ public class WorkerRunnable implements Runnable {
 
 	public void readCommand() {
 		try {
+			System.out.println("In readCommand() method");
 			ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
-
+			objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+			// changes = processInput(new Command("started", null));
+			// Command inputCo = (Command) objectIn.readObject();
+			// changes = processInput(inputCo);
 			changes = processInput(new Command("started", null));
 
-			ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-			objectOut.writeObject(changes);
+			// objectOut.writeObject(changes);
 
-			Command inputCommand = null;
+			// Command inputCommand = (Command) objectIn.readObject();
+			//
+			// changes = processInput(inputCommand);
+			// objectOut.writeObject(changes);
 
-			while ((inputCommand = (Command) objectIn.readObject()) != null) {
-
+			while (isConnected) {
+				Command inputCommand = (Command) objectIn.readObject();
+				System.out.println("Command received is " + inputCommand.getName());
 				changes = processInput(inputCommand);
-				objectOut.writeObject(changes);
+				System.out.println("In while loop" + changes[1]);
+				// objectOut.writeObject(changes);
 				if (inputCommand.getName().equals("disconnect")) {
 					break;
 				}
-
 			}
+
 		} catch (IOException | ClassNotFoundException e) {
 			e.printStackTrace();
 		}
 	}
 
-	public Object[] processInput(Command input) {
+	public Object[] processInput(Command input) throws IOException {
+		System.out.println(input.getName());
 		changes = new Object[5];
 
 		// Checks if the while loop sends the same command again
-		if (input.equals(lastCommand)) {
-			if (!finishedRamping) {
-				logUpdate = null;
-			} else {
-				finishedRamping = false;
-			}
+		// if (input.equals(lastCommand)) {
+		// System.out.println("lastcommand was the same");
+		// if (!finishedRamping) {
+		// logUpdate = null;
+		// } else {
+		// finishedRamping = false;
+		// }
 
-			// Set's up initial while loop connection
-		} else if (input.getName().equals("started")) {
+		// Set's up initial while loop connection
+		if (input.getName().equals("started")) {
 			if (!isConnected) {
 				logUpdate = "Connection established with server";
+				isConnected = true;
 			} else {
 				logUpdate = null;
 			}
 			isConnected = true;
 
-			// Handles commands when the device is off
-		}
-		// REVIEW (high): the "else if" statements below don't make much sense.
-		// Instead you should simply forward
-		// the requests to "NarrowRampedPowerSupplyImpl" class, like you did
-		// below:
-		// device.execute(input.getName(), input.getParamters());
-		// The "NarrowRampedPowerSupplyImpl" will throw exception if the proper
-		// conditions are not met.
+		} else if (input.getName().equals("disconnect")) {
+			System.out.println("Client is disconnected from server");
+			isConnected = false;
 
-		// These comments wouldn't work with the way my solution is implemented
-		// as the parameters sent from the Client are the wrong type. I thought
-		// I wasn't allowed to change my NarrowRampedPowerSupplyImpl and all the
-		// other
-		// old code, "consider them black box" like in problem 4. Hence I made
-		// my
-		// solution this way, because to be able to use
-		// device.execute(input.getName(), input.getParameters()) I would need
-		// to have methods in my powerSupply classes that accept parameters of
-		// type String (because
-		// PanelClient sends the parameters as String) and then in each method
-		// in the relevant powersupply method do the
-		// parsing to numbers(or making the inputs into arrays depending on the
-		// command), and then in the same powersupply method throw the
-		// exceptions
-		// if the input can't be parsed to the right type, and then somehow set
-		// the logUpdate to the exception thrown. As I did not need to
-		// do this for problem 4 I don't understand why I need to do it now. And
-		// if I instead was to do the parsing/to array of the input in the
-		// PanelClient instead, then the logUpdate in case the input type is
-		// wrong would come from the PanelClient and not from the server, which
-		// I think would be wrong.
-
-		// REVIEW RESPONSE: if your client currently sends parameters as strings, modify it so it will send the as a
-		// type "NarrowRampedPowerSupplyImpl" expects.
-		// As mentioned in my previous comment, the "device.execute(input.getName(), input.getParamters());"
-		// should be able to work for all the commands.
-		// If it doesn't, the previous solutions were wrong (obviously, I didn't pay enough attention in the review
-		// of the previous assignments so some issues slipped through the review process.).
-		else if (!device.isOn()) {
-			if (input.getName().equals("on")) {
+		} else {
+			try {
+				System.out.println("Executing command " + input.getName());
 				device.execute(input.getName(), input.getParamters());
-				logUpdate = "Device is turned ON";
-			} else {
-				logUpdate = "Error: Could not perform command,\n power is OFF";
-			}
-			// Updates log area if commands are made while ramping
-		} else if (device.isRamping()) {
-			logUpdate = "Error: Could not perform command, \n device is ramping";
+				if (input.getName().equals("startRamp")) {
+					isRamping = true;
+					msecs = Integer.parseInt(input.getParamters()[0]);
+					synchronized (this) {
+						CurrentValueFinder cvf = new CurrentValueFinder();
 
-			// Handles commands when the device is on
-		} else if (device.isOn() && !device.isRamping()) {
-			if (input.getName().equals("on")) {
-				logUpdate = "Error: Device is already ON";
-			} else if (input.getName().equals("setTime")) {
-				if (isInteger((String) input.getParamters()[0])) {
-					msecs = Integer.parseInt((String) input.getParamters()[0]);
-					logUpdate = "Ramping time set to: " + msecs + " msecs";
-				} else {
-					logUpdate = "Error: Only one number accepted";
-				}
-			} else if (input.getName().equals("startRamp")) {
-				if (!device.isRamping()) {
-					if (rampValues == null) {
-						logUpdate = "Error: Ramp values have not been loaded";
-					} else {
-						if (msecs == 0) {
-							logUpdate = "Error: No ramping time has been given";
-						} else {
-							device.execute(input.getName(), new Object[] { msecs });
-							logUpdate = "Current ramping";
-							CurrentValueFinder cvf = new CurrentValueFinder();
-							cvf.execute();
-						}
+						cvf.execute();
 					}
 				}
-			}
-			// REVIEW (high): similar to the review comment above. Why do you
-			// use the "if" statement?
-			// Simply forwarding request to "NarrowRampedPowerSupplyImpl" using
-			// "device.execute(input.getName(), input.getParamters());" should
-			// be enough.
-			if (input.getName().equals("off")) {
-				logUpdate = "Device is turned OFF";
-				device.execute(input.getName(), input.getParamters());
+				
+				logUpdate = "Command " + input.getName() + " executed";
 
-			} else if (input.getName().equals("reset")) {
-				rampValues = input.getParamters();
-				device.execute(input.getName(), input.getParamters());
-				logUpdate = "Current was reset";
-
-			} else if (input.getName().equals("current_set")) {
-				if (isDouble(input.getParamters()[0].toString())) {
-					device.execute("current_set",
-							new Object[] { Double.parseDouble(input.getParamters()[0].toString()) });
-					logUpdate = "Current set to: " + getCurrentValue();
-				} else {
-					logUpdate = "Error: Only numbers accepted";
+				if (input.getName().equals("loadRamp")) {
+					rampValues = input.getParamters();
 				}
-
-			} else if (input.getName().equals("loadRamp")) {
-				String[] array = input.getParamters()[0].toString().split("[,\\s]+");
-				rampValues = new Object[array.length];
-				if (isAllDouble(array)) {
-					for (int i = 0; i < rampValues.length; i++) {
-						rampValues[i] = Double.parseDouble(array[i]);
-					}
-					device.execute(input.getName(), rampValues);
-					logUpdate = "Ramp values loaded";
-				} else {
-					logUpdate = "Error: Only numbers accepted";
-				}
-
-			} else if (input.getName().equals("disconnect")) {
-				System.out.println("Client is disconnected from server");
-				isConnected = false;
+			} catch (Exception e) {
+				logUpdate = e.getMessage();
+				e.printStackTrace();
 			}
 		}
-		changes[0] = getCurrentValue();
-		changes[1] = logUpdate;
-		changes[2] = device.isOn();
-		changes[3] = device.isRamping();
-		changes[4] = isConnected;
+		System.out.println("logUpdate in readCommand() " + logUpdate);
+		if (device.isRamping()) {
+			System.out.println("Device is ramping values");
+			// changes[0] = device.execute("current_get", null);
+			changes[0] = currentValue;
+			System.out.println("Currentvalue for device is ramping " + currentValue);
+			changes[3] = isRamping;
+		} else {
+			System.out.println("Not ramping values");
+			changes[1] = logUpdate;
+			changes[2] = device.isOn();
+			// changes[3] = device.isRamping();
+			changes[4] = isConnected;
+			changes[0] = getCurrentValue();
+			changes[3] = device.isRamping();
+			objectOut.writeObject(changes);
+			System.out.println("Objects sent to client in readcommnd");
+		}
+
 
 		lastCommand = input;
+
+
 
 		return changes;
 	}
@@ -211,11 +153,24 @@ public class WorkerRunnable implements Runnable {
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
+			System.out.println("Do in background");
 			for (int i = 0; i <= rampValues.length; i++) {
-				if (i == rampValues.length) {
-					finishedRamping = true;
-					logUpdate = "Ramping completed";
+				currentValue = device.execute("current_get", null).toString();
+
+				logUpdate = null;
+				if (i == rampValues.length - 1) {
+					isRamping = false;
+					logUpdate = "Ramping completed \n";
 				}
+				System.out.println(currentValue);
+				changes[0] = currentValue;
+				changes[1] = logUpdate;
+				changes[2] = device.isOn();
+				changes[3] = isRamping;
+				changes[4] = isConnected;
+				objectOut.writeObject(changes);
+
+				System.out.println("Objects from do in background");
 				Thread.sleep(msecs);
 			}
 			return null;
@@ -230,32 +185,5 @@ public class WorkerRunnable implements Runnable {
 			value = device.execute("current_get", null).toString();
 		}
 		return value;
-	}
-
-	private boolean isDouble(String number) throws NumberFormatException {
-		try {
-			Double.parseDouble(number);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
-	}
-
-	private boolean isAllDouble(String[] array) {
-		for (int i = 0; i < array.length; i++) {
-			if (!isDouble(array[i])) {
-				return false;
-			}
-		}
-		return true;
-	}
-
-	private boolean isInteger(String number) throws NumberFormatException {
-		try {
-			Integer.parseInt(number);
-		} catch (NumberFormatException e) {
-			return false;
-		}
-		return true;
 	}
 }
