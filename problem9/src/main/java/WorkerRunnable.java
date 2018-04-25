@@ -111,6 +111,13 @@ public class WorkerRunnable implements Runnable {
 		// PanelClient instead, then the logUpdate in case the input type is
 		// wrong would come from the PanelClient and not from the server, which
 		// I think would be wrong.
+
+		// REVIEW RESPONSE: if your client currently sends parameters as strings, modify it so it will send the as a
+		// type "NarrowRampedPowerSupplyImpl" expects.
+		// As mentioned in my previous comment, the "device.execute(input.getName(), input.getParamters());"
+		// should be able to work for all the commands.
+		// If it doesn't, the previous solutions were wrong (obviously, I didn't pay enough attention in the review
+		// of the previous assignments so some issues slipped through the review process.).
 		else if (!device.isOn()) {
 			if (input.getName().equals("on")) {
 				device.execute(input.getName(), input.getParamters());
