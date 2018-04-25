@@ -11,7 +11,6 @@ public class WorkerRunnable implements Runnable {
 	protected Socket clientSocket = null;
 	protected String serverText = null;
 
-
 	private DeviceNarrow device;
 
 	private Object[] changes;
@@ -21,7 +20,6 @@ public class WorkerRunnable implements Runnable {
 	private boolean finishedRamping = false;
 	private boolean isConnected = false;
 
-	
 	private int msecs;
 
 	private Command lastCommand = null;
@@ -44,7 +42,7 @@ public class WorkerRunnable implements Runnable {
 
 			ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
 			objectOut.writeObject(changes);
-			
+
 			Command inputCommand = null;
 
 			while ((inputCommand = (Command) objectIn.readObject()) != null) {
@@ -83,10 +81,36 @@ public class WorkerRunnable implements Runnable {
 
 			// Handles commands when the device is off
 		}
-		// REVIEW (high): the "else if" statements below don't make much sense. Instead you should simply forward
-		// the requests to "NarrowRampedPowerSupplyImpl" class, like you did below:
+		// REVIEW (high): the "else if" statements below don't make much sense.
+		// Instead you should simply forward
+		// the requests to "NarrowRampedPowerSupplyImpl" class, like you did
+		// below:
 		// device.execute(input.getName(), input.getParamters());
-		// The "NarrowRampedPowerSupplyImpl" will throw exception if the proper conditions are not met.
+		// The "NarrowRampedPowerSupplyImpl" will throw exception if the proper
+		// conditions are not met.
+
+		// These comments wouldn't work with the way my solution is implemented
+		// as the parameters sent from the Client are the wrong type. I thought
+		// I wasn't allowed to change my NarrowRampedPowerSupplyImpl and all the
+		// other
+		// old code, "consider them black box" like in problem 4. Hence I made
+		// my
+		// solution this way, because to be able to use
+		// device.execute(input.getName(), input.getParameters()) I would need
+		// to have methods in my powerSupply classes that accept parameters of
+		// type String (because
+		// PanelClient sends the parameters as String) and then in each method
+		// in the relevant powersupply method do the
+		// parsing to numbers(or making the inputs into arrays depending on the
+		// command), and then in the same powersupply method throw the
+		// exceptions
+		// if the input can't be parsed to the right type, and then somehow set
+		// the logUpdate to the exception thrown. As I did not need to
+		// do this for problem 4 I don't understand why I need to do it now. And
+		// if I instead was to do the parsing/to array of the input in the
+		// PanelClient instead, then the logUpdate in case the input type is
+		// wrong would come from the PanelClient and not from the server, which
+		// I think would be wrong.
 		else if (!device.isOn()) {
 			if (input.getName().equals("on")) {
 				device.execute(input.getName(), input.getParamters());
@@ -125,9 +149,11 @@ public class WorkerRunnable implements Runnable {
 					}
 				}
 			}
-			// REVIEW (high): similar to the review comment above. Why do you use the "if" statement?
+			// REVIEW (high): similar to the review comment above. Why do you
+			// use the "if" statement?
 			// Simply forwarding request to "NarrowRampedPowerSupplyImpl" using
-			// "device.execute(input.getName(), input.getParamters());" should be enough.
+			// "device.execute(input.getName(), input.getParamters());" should
+			// be enough.
 			if (input.getName().equals("off")) {
 				logUpdate = "Device is turned OFF";
 				device.execute(input.getName(), input.getParamters());
