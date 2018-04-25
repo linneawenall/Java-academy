@@ -97,6 +97,10 @@ public class PanelClient implements ActionListener {
 			// then a while loop looks like the way to do it. If you have any
 			// other ideas, feel free to share, because I spent 10 hours on this
 			// part and time is precious :)
+
+			// REVIEW RESPONSE: in general, all sockets stay connected until either client or server side close them
+			// (by calling the "close()" method on the socket). So if your connection is unable to stay open, check
+			// if you don't close it unintentionally in some part of the code.
 			
 			while ((fromServer = (Object[]) in.readObject()) != null) {
 				if (fromServer.length == 1) {
