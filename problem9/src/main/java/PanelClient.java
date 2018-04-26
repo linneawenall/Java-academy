@@ -132,6 +132,7 @@ public class PanelClient implements ActionListener {
 			fromUser = new Command("loadRamp", array);
 
 		} else if (evt.getSource().equals(startButton)) {
+			//HERE I SHOULD PROBABLY HAVE A CURRENTVALUEFINDER BEING STARTED
 			fromUser = new Command("startRamp", new String[] { timeText.getText() });
 
 		}
