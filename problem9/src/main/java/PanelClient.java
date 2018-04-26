@@ -96,6 +96,12 @@ public class PanelClient implements ActionListener {
 
 	public void readAndUpdate() {
 		try {
+			// REVIEW (high): your implementation of the communication with the server confuses me. I would expect
+			// the following approach to be implemented when sending commands:
+			// 1. send "fromUser" command object to the server.
+			// 2. read response from the server.
+			// This could be implemented in a separate "executeCommandOnServer" method. The method could be used
+			// far all the commands you needed to execute on the server.
 			fromServer = (Object[]) in.readObject();
 			for (int i = 0; i < fromServer.length; i++) {
 				System.out.println("Value at index " + i + " is " + fromServer[i]);
@@ -137,6 +143,7 @@ public class PanelClient implements ActionListener {
 		}
 		try {
 			System.out.println("command sent " + fromUser.getName());
+			// REVIEW (high): your "executeCommandOnServer" could be executed from here.
 			out.writeObject(fromUser);
 		} catch (IOException e) {
 			e.printStackTrace();
