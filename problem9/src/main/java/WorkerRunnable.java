@@ -33,35 +33,20 @@ public class WorkerRunnable implements Runnable {
 		this.clientSocket = clientSocket;
 		this.serverText = serverText;
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
+		isConnected = true;
 	}
 
 	public void run() {
-		readCommand();
-	}
-
-	public void readCommand() {
 		try {
 			System.out.println("In readCommand() method");
 			ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
 			objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-			// changes = processInput(new Command("started", null));
-			// Command inputCo = (Command) objectIn.readObject();
-			// changes = processInput(inputCo);
-			changes = processInput(new Command("started", null));
-
-			// objectOut.writeObject(changes);
-
-			// Command inputCommand = (Command) objectIn.readObject();
-			//
-			// changes = processInput(inputCommand);
-			// objectOut.writeObject(changes);
 
 			while (isConnected) {
 				Command inputCommand = (Command) objectIn.readObject();
 				System.out.println("Command received is " + inputCommand.getName());
-				changes = processInput(inputCommand);
-				System.out.println("In while loop" + changes[1]);
-				// objectOut.writeObject(changes);
+				// sets Object[] to different values
+				processInput(inputCommand);
 				if (inputCommand.getName().equals("disconnect")) {
 					break;
 				}
@@ -72,30 +57,11 @@ public class WorkerRunnable implements Runnable {
 		}
 	}
 
-	public Object[] processInput(Command input) throws IOException {
+	public void processInput(Command input) throws IOException {
 		System.out.println(input.getName());
 		changes = new Object[5];
 
-		// Checks if the while loop sends the same command again
-		// if (input.equals(lastCommand)) {
-		// System.out.println("lastcommand was the same");
-		// if (!finishedRamping) {
-		// logUpdate = null;
-		// } else {
-		// finishedRamping = false;
-		// }
-
-		// Set's up initial while loop connection
-		if (input.getName().equals("started")) {
-			if (!isConnected) {
-				logUpdate = "Connection established with server";
-				isConnected = true;
-			} else {
-				logUpdate = null;
-			}
-			isConnected = true;
-
-		} else if (input.getName().equals("disconnect")) {
+		if (input.getName().equals("disconnect")) {
 			System.out.println("Client is disconnected from server");
 			isConnected = false;
 
@@ -103,77 +69,62 @@ public class WorkerRunnable implements Runnable {
 			try {
 				System.out.println("Executing command " + input.getName());
 				device.execute(input.getName(), input.getParamters());
-				if (input.getName().equals("startRamp")) {
-					isRamping = true;
-					msecs = Integer.parseInt(input.getParamters()[0]);
-					synchronized (this) {
-						CurrentValueFinder cvf = new CurrentValueFinder();
-
-						cvf.execute();
-					}
-				}
-				
 				logUpdate = "Command " + input.getName() + " executed";
-
-				if (input.getName().equals("loadRamp")) {
-					rampValues = input.getParamters();
-				}
 			} catch (Exception e) {
 				logUpdate = e.getMessage();
 				e.printStackTrace();
 			}
+			// logUpdate = "Command " + input.getName() + " executed";
+			if (input.getName().equals("loadRamp")) {
+				rampValues = input.getParamters();
+			}
+			if (input.getName().equals("startRamp")) {
+				isRamping = true;
+				msecs = Integer.parseInt(input.getParamters()[0]);
+
+				CurrentValueFinder cvf = new CurrentValueFinder();
+				cvf.execute();
+
+			} else {
+				System.out.println("Setting changes - state: not ramping");
+				changes[0] = getCurrentValue();
+				changes[1] = logUpdate;
+				changes[2] = device.isOn();
+				changes[3] = device.isRamping();
+				changes[4] = isConnected;
+				objectOut.writeObject(changes);
+				System.out.println("Objects sent to client in readcommnd");
+			}
+
 		}
-		System.out.println("logUpdate in readCommand() " + logUpdate);
-		if (device.isRamping()) {
-			System.out.println("Device is ramping values");
-			// changes[0] = device.execute("current_get", null);
-			changes[0] = currentValue;
-			System.out.println("Currentvalue for device is ramping " + currentValue);
-			changes[3] = isRamping;
-		} else {
-			System.out.println("Not ramping values");
-			changes[1] = logUpdate;
-			changes[2] = device.isOn();
-			// changes[3] = device.isRamping();
-			changes[4] = isConnected;
-			changes[0] = getCurrentValue();
-			changes[3] = device.isRamping();
-			objectOut.writeObject(changes);
-			System.out.println("Objects sent to client in readcommnd");
-		}
-
-
-		lastCommand = input;
-
-
-
-		return changes;
 	}
 
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
-			System.out.println("Do in background");
-			for (int i = 0; i <= rampValues.length; i++) {
-				currentValue = device.execute("current_get", null).toString();
+			synchronized (this) {
+				System.out.println("Do in background");
+				Object[] rampingChanges = new Object[5];
+				for (int i = 0; i <= rampValues.length; i++) {
 
-				logUpdate = null;
-				if (i == rampValues.length - 1) {
-					isRamping = false;
-					logUpdate = "Ramping completed \n";
+					logUpdate = null;
+					if (i == rampValues.length) {
+						System.out.println("Reached end of rampvalues array");
+						isRamping = false;
+						logUpdate = "Ramping completed \n";
+					}
+					System.out.println(
+							"Value of current doInbackground: " + device.execute("current_get", null).toString());
+					rampingChanges[0] = device.execute("current_get", null).toString();
+					rampingChanges[1] = logUpdate;
+					rampingChanges[2] = device.isOn();
+					rampingChanges[3] = isRamping;
+					rampingChanges[4] = true;
+					objectOut.writeObject(rampingChanges);
+					Thread.sleep(msecs);
 				}
-				System.out.println(currentValue);
-				changes[0] = currentValue;
-				changes[1] = logUpdate;
-				changes[2] = device.isOn();
-				changes[3] = isRamping;
-				changes[4] = isConnected;
-				objectOut.writeObject(changes);
-
-				System.out.println("Objects from do in background");
-				Thread.sleep(msecs);
+				return null;
 			}
-			return null;
 		}
 	};
 
@@ -181,6 +132,8 @@ public class WorkerRunnable implements Runnable {
 		String value;
 		if (!device.isOn()) {
 			value = "";
+			// } else if (device.isRamping()) {
+			// value = currentValue;
 		} else {
 			value = device.execute("current_get", null).toString();
 		}

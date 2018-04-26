@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingWorker;
 import javax.swing.text.DefaultCaret;
 
 public class PanelClient implements ActionListener {
@@ -40,11 +41,12 @@ public class PanelClient implements ActionListener {
 	private static Socket clientSocket;
 	private static final int PORT = 4444;
 	private boolean isConnected;
-	private ObjectOutputStream out;
+	private static ObjectOutputStream out;
 	private ObjectInputStream in;
 
 	private static Command fromUser;
 	private Object[] fromServer;
+	private String[] array;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 		JFrame frame = new JFrame("PowerSupply Panel");
@@ -55,6 +57,11 @@ public class PanelClient implements ActionListener {
 			@Override
 			public void windowClosing(WindowEvent e) {
 				fromUser = new Command("disconnect", null);
+				try {
+					out.writeObject(fromUser);
+				} catch (IOException e1) {
+					e1.printStackTrace();
+				}
 				e.getWindow().dispose();
 			}
 		});
@@ -69,21 +76,20 @@ public class PanelClient implements ActionListener {
 
 	}
 
+	public PanelClient() throws FileNotFoundException {
+		deviceIcon = createImageIcon("/red.png", "Red dot");
+		rampIcon = createImageIcon("/red.png", "Red dot");
+
+	}
+
 	public void initConnection() throws ClassNotFoundException {
 		try {
-			System.out.println("InitConnection");
 
 			clientSocket = new Socket("localhost", PORT);
-			System.out.println("ClientSocket initiated");
 
 			out = new ObjectOutputStream(clientSocket.getOutputStream());
-			System.out.println("out created");
 
 			in = new ObjectInputStream(clientSocket.getInputStream());
-			System.out.println("in created");
-
-			fromUser = new Command("started", null);
-			readAndUpdate();
 
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
@@ -91,30 +97,6 @@ public class PanelClient implements ActionListener {
 		} catch (IOException e) {
 			System.err.println("Couldn't get I/O for the connection to localhost ");
 			System.exit(1);
-		}
-	}
-
-	public void readAndUpdate() {
-		try {
-			// REVIEW (high): your implementation of the communication with the server confuses me. I would expect
-			// the following approach to be implemented when sending commands:
-			// 1. send "fromUser" command object to the server.
-			// 2. read response from the server.
-			// This could be implemented in a separate "executeCommandOnServer" method. The method could be used
-			// far all the commands you needed to execute on the server.
-			fromServer = (Object[]) in.readObject();
-			for (int i = 0; i < fromServer.length; i++) {
-				System.out.println("Value at index " + i + " is " + fromServer[i]);
-			}
-			if (fromServer.length == 1) {
-				logArea.append(fromServer[0].toString());
-				clientSocket.close();
-			}
-			updateGUI(fromServer);
-			
-
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -134,29 +116,64 @@ public class PanelClient implements ActionListener {
 			fromUser = new Command("current_set", new String[] { setText.getText() });
 
 		} else if (evt.getSource().equals(rampText)) {
-			String[] array = rampText.getText().split("[,\\s]+");
+			array = rampText.getText().split("[,\\s]+");
 			fromUser = new Command("loadRamp", array);
 
 		} else if (evt.getSource().equals(startButton)) {
-			//HERE I SHOULD PROBABLY HAVE A CURRENTVALUEFINDER BEING STARTED
 			fromUser = new Command("startRamp", new String[] { timeText.getText() });
 
 		}
+
+		System.out.println("command sent " + fromUser.getName());
+		executeOnServer(fromUser);
+	}
+
+	public void executeOnServer(Command command) {
 		try {
-			System.out.println("command sent " + fromUser.getName());
-			// REVIEW (high): your "executeCommandOnServer" could be executed from here.
 			out.writeObject(fromUser);
-		} catch (IOException e) {
+
+			if (fromUser.getName().equals("startRamp")) {
+				synchronized (this) {
+					CurrentValueFinder cvf = new CurrentValueFinder();
+					cvf.execute();
+				}
+
+			} else {
+				fromServer = (Object[]) in.readObject();
+			}
+			// If the client can't connect
+			if (fromServer.length == 1) {
+				logArea.append(fromServer[0].toString());
+				clientSocket.close();
+			} else {
+				// For-loop just for debugging
+				for (int i = 0; i < fromServer.length; i++) {
+					System.out.println("Value at index " + i + " is " + fromServer[i]);
+				}
+				updateGUI(fromServer);
+			}
+
+		} catch (ClassNotFoundException | IOException e) {
 			e.printStackTrace();
 		}
-		readAndUpdate();
 	}
 
-	public PanelClient() throws FileNotFoundException {
-		deviceIcon = createImageIcon("/red.png", "Red dot");
-		rampIcon = createImageIcon("/red.png", "Red dot");
-
-	}
+	private class CurrentValueFinder extends SwingWorker<Void, Void> {
+		@Override
+		protected Void doInBackground() throws Exception {
+			for (int i = 0; i <= array.length; i++) {
+				// Why does this not successfully read the new objects being
+				// sent from CurrentValueFinder in WorkerRunnable? The printouts
+				// in CVF in WorkerRunnable indicate that the values are set,
+				// but the printouts in updateGUI method indicate only the first
+				// Object array is being sent..
+				fromServer = (Object[]) in.readObject();
+				updateGUI(fromServer);
+				Thread.sleep(Integer.parseInt(timeText.getText()));
+			}
+			return null;
+		}
+	};
 
 	public void placeComponents(JPanel panel) throws FileNotFoundException {
 
@@ -351,11 +368,12 @@ public class PanelClient implements ActionListener {
 
 	public void updateGUI(Object[] fromServer) {
 		System.out.println("Updating GUI");
+		System.out.println("Currentvalue is " + (String) fromServer[0]);
 		if ((String) fromServer[0] != null) {
 			currentLabel.setText((String) fromServer[0]);
 		}
 		if ((String) fromServer[1] != null) {
-			//System.out.println((String) fromServer[1]);
+			// System.out.println((String) fromServer[1]);
 			logArea.append((String) fromServer[1] + "\n");
 		}
 		deviceLabel.setIcon(whichIcon((boolean) fromServer[2]));
