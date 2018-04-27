@@ -61,7 +61,7 @@ public class ThreadPooledServer implements Runnable {
 				try {
 
 					ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect" });
+					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect"});
 					System.out.println("New client can't connect");
 
 				} catch (IOException e) {

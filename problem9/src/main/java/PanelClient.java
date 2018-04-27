@@ -23,6 +23,7 @@ import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.JTextField;
+import javax.swing.SwingUtilities;
 import javax.swing.SwingWorker;
 import javax.swing.text.DefaultCaret;
 
@@ -49,30 +50,41 @@ public class PanelClient implements ActionListener {
 	private String[] array;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
-		JFrame frame = new JFrame("PowerSupply Panel");
-		frame.setSize(265, 497);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 
-		frame.addWindowListener(new WindowAdapter() {
+		SwingUtilities.invokeLater(new Runnable() {
 			@Override
-			public void windowClosing(WindowEvent e) {
-				fromUser = new Command("disconnect", null);
+			public void run() {
+				JFrame frame = new JFrame("PowerSupply Panel");
+				frame.setSize(265, 497);
+				frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+				frame.addWindowListener(new WindowAdapter() {
+					@Override
+					public void windowClosing(WindowEvent e) {
+						fromUser = new Command("disconnect", null);
+						try {
+							out.writeObject(fromUser);
+						} catch (IOException e1) {
+							e1.printStackTrace();
+						}
+						e.getWindow().dispose();
+					}
+				});
+
+				JPanel panel = new JPanel();
+				panel.setBackground(Color.decode("#CCCCFF"));
+				frame.add(panel);
+				PanelClient comp;
 				try {
-					out.writeObject(fromUser);
-				} catch (IOException e1) {
+					comp = new PanelClient();
+					comp.placeComponents(panel);
+					frame.setVisible(true);
+					comp.initConnection();
+				} catch (FileNotFoundException | ClassNotFoundException e1) {
 					e1.printStackTrace();
 				}
-				e.getWindow().dispose();
 			}
 		});
-
-		JPanel panel = new JPanel();
-		panel.setBackground(Color.decode("#CCCCFF"));
-		frame.add(panel);
-		PanelClient comp = new PanelClient();
-		comp.placeComponents(panel);
-		frame.setVisible(true);
-		comp.initConnection();
 
 	}
 
@@ -90,6 +102,12 @@ public class PanelClient implements ActionListener {
 			out = new ObjectOutputStream(clientSocket.getOutputStream());
 
 			in = new ObjectInputStream(clientSocket.getInputStream());
+
+			// Start here! Not working to update the second panel with "Server is BUSY"
+			// executeOnServer(new Command("", null));
+			// if ((fromServer = (Object[]) in.readObject()) == null) {
+			// logArea.append(fromServer[0].toString());
+			// }
 
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
@@ -129,28 +147,15 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void executeOnServer(Command command) {
+
 		try {
 			out.writeObject(fromUser);
+			fromServer = (Object[]) in.readObject();
+			updateGUI(fromServer);
 
 			if (fromUser.getName().equals("startRamp")) {
-				synchronized (this) {
-					CurrentValueFinder cvf = new CurrentValueFinder();
-					cvf.execute();
-				}
-
-			} else {
-				fromServer = (Object[]) in.readObject();
-			}
-			// If the client can't connect
-			if (fromServer.length == 1) {
-				logArea.append(fromServer[0].toString());
-				clientSocket.close();
-			} else {
-				// For-loop just for debugging
-				for (int i = 0; i < fromServer.length; i++) {
-					System.out.println("Value at index " + i + " is " + fromServer[i]);
-				}
-				updateGUI(fromServer);
+				CurrentValueFinder cvf = new CurrentValueFinder();
+				cvf.execute();
 			}
 
 		} catch (ClassNotFoundException | IOException e) {
@@ -161,12 +166,8 @@ public class PanelClient implements ActionListener {
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
-			for (int i = 0; i <= array.length; i++) {
-				// Why does this not successfully read the new objects being
-				// sent from CurrentValueFinder in WorkerRunnable? The printouts
-				// in CVF in WorkerRunnable indicate that the values are set,
-				// but the printouts in updateGUI method indicate only the first
-				// Object array is being sent..
+			for (int i = 0; i <= array.length - 1; i++) {
+				out.writeObject(new Command("ramping", null));
 				fromServer = (Object[]) in.readObject();
 				updateGUI(fromServer);
 				Thread.sleep(Integer.parseInt(timeText.getText()));
@@ -367,8 +368,8 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void updateGUI(Object[] fromServer) {
-		System.out.println("Updating GUI");
-		System.out.println("Currentvalue is " + (String) fromServer[0]);
+		// System.out.println("Updating GUI");
+		// System.out.println("Currentvalue is " + (String) fromServer[0]);
 		if ((String) fromServer[0] != null) {
 			currentLabel.setText((String) fromServer[0]);
 		}
