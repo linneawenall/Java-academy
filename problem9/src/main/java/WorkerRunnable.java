@@ -10,6 +10,7 @@ public class WorkerRunnable implements Runnable {
 	protected Socket clientSocket;
 	protected String serverText;
 	private ThreadPooledServer server;
+	private boolean canConnect;
 
 	private DeviceNarrow device;
 
@@ -18,11 +19,13 @@ public class WorkerRunnable implements Runnable {
 	private String logUpdate;
 
 	private boolean isConnected;
+	
 
-	public WorkerRunnable(ThreadPooledServer server, Socket clientSocket, String serverText) {
+	public WorkerRunnable(ThreadPooledServer server, boolean canConnect, Socket clientSocket, String serverText) {
 		this.clientSocket = clientSocket;
 		this.serverText = serverText;
 		this.server = server;
+		this.canConnect = canConnect;
 
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		isConnected = true;
@@ -61,7 +64,13 @@ public class WorkerRunnable implements Runnable {
 				logUpdate = "Ramping completed";
 			}
 		} else if (input.getName().equals("Can client connect?")) {
-			logUpdate = null;
+			if (canConnect) {
+				logUpdate = null;
+			} else {
+				logUpdate = "Server is BUSY, can't connect";
+				isConnected = false;
+				server.disconnectClient(this);
+			}
 		} else {
 			try {
 				System.out.println("Executing command " + input.getName());

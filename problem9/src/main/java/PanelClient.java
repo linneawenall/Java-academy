@@ -151,15 +151,9 @@ public class PanelClient implements ActionListener {
 			try {
 				out.writeObject(command);
 				fromServer = (Object[]) in.readObject();
-
-				if (fromServer.length == 1) {
-					logArea.append((String) fromServer[0]);
+				updateGUI(fromServer);
+				if (!isConnected) {
 					clientSocket.close();
-				} else {
-					updateGUI(fromServer);
-					if (!isConnected) {
-						clientSocket.close();
-					}
 				}
 
 				if (command.getName().equals("startRamp")) {

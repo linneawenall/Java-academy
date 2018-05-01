@@ -27,8 +27,8 @@ public class ThreadPooledServer implements Runnable {
 		ThreadPooledServer server = new ThreadPooledServer(4444);
 		new Thread(server).start();
 
-		//QUESTION: This bit that I commented out, should I have it or not..?
-		
+		// QUESTION: This bit that I commented out, should I have it or not..?
+
 		// try {
 		// Thread.sleep(20 * 1000);
 		// } catch (InterruptedException e) {
@@ -59,17 +59,8 @@ public class ThreadPooledServer implements Runnable {
 			}
 
 			boolean canConnect = (clientList.size() < 1 ? true : false);
-			if (canConnect) {
-				WorkerRunnable runnable = new WorkerRunnable(this, clientSocket, "Thread Pooled Server");
-				this.threadPool.execute(runnable);
-			} else {
-				try {
-					ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect" });
-				} catch (IOException e) {
-					e.printStackTrace();
-				}
-			}
+			WorkerRunnable runnable = new WorkerRunnable(this, canConnect, clientSocket, "Thread Pooled Server");
+			this.threadPool.execute(runnable);
 
 		}
 
