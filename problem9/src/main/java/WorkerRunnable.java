@@ -19,7 +19,6 @@ public class WorkerRunnable implements Runnable {
 	private String logUpdate;
 
 	private boolean isConnected;
-	
 
 	public WorkerRunnable(ThreadPooledServer server, boolean canConnect, Socket clientSocket, String serverText) {
 		this.clientSocket = clientSocket;
@@ -29,7 +28,9 @@ public class WorkerRunnable implements Runnable {
 
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		isConnected = true;
-		server.addClient(this);
+		if (canConnect) {
+			server.addClient(this);
+		}
 	}
 
 	public void run() {
@@ -55,21 +56,18 @@ public class WorkerRunnable implements Runnable {
 
 	public Object[] processInput(Command input) throws IOException {
 		changes = new Object[5];
+		logUpdate = null;
 		if (input.getName().equals("disconnect")) {
 			System.out.println("Client is disconnected from server");
 			isConnected = false;
 		} else if (input.getName().equals("ramping")) {
-			logUpdate = null;
 			if (!device.isRamping()) {
 				logUpdate = "Ramping completed";
 			}
 		} else if (input.getName().equals("Can client connect?")) {
-			if (canConnect) {
-				logUpdate = null;
-			} else {
+			if (!canConnect) {
 				logUpdate = "Server is BUSY, can't connect";
 				isConnected = false;
-				server.disconnectClient(this);
 			}
 		} else {
 			try {
