@@ -4,28 +4,29 @@ import java.io.ObjectOutputStream;
 import java.io.IOException;
 import java.net.Socket;
 
-
 public class WorkerRunnable implements Runnable {
 
-	protected Socket clientSocket = null;
-	protected String serverText = null;
+	// Server
+	protected Socket clientSocket;
+	protected String serverText;
+	private ThreadPooledServer server;
 
 	private DeviceNarrow device;
 
 	private Object[] changes;
 
+	private String logUpdate;
 
-	private String logUpdate = null;
+	private boolean isConnected;
 
-	private boolean isConnected = false;
-
-
-
-	public WorkerRunnable(Socket clientSocket, String serverText) {
+	public WorkerRunnable(ThreadPooledServer server, Socket clientSocket, String serverText) {
 		this.clientSocket = clientSocket;
 		this.serverText = serverText;
+		this.server = server;
+
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		isConnected = true;
+		server.addClient(this);
 	}
 
 	public void run() {
@@ -39,6 +40,7 @@ public class WorkerRunnable implements Runnable {
 				changes = processInput(inputCommand);
 				objectOut.writeObject(changes);
 				if (inputCommand.getName().equals("disconnect")) {
+					server.disconnectClient(this);
 					break;
 				}
 			}
@@ -58,6 +60,8 @@ public class WorkerRunnable implements Runnable {
 			if (!device.isRamping()) {
 				logUpdate = "Ramping completed";
 			}
+		} else if (input.getName().equals("Can client connect?")) {
+			logUpdate = null;
 		} else {
 			try {
 				System.out.println("Executing command " + input.getName());
@@ -72,6 +76,7 @@ public class WorkerRunnable implements Runnable {
 		changes[2] = device.isOn();
 		changes[3] = device.isRamping();
 		changes[4] = isConnected;
+
 		return changes;
 	}
 

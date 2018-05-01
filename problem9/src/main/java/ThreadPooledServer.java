@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
+import java.util.ArrayList;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -16,22 +17,26 @@ public class ThreadPooledServer implements Runnable {
 	protected Thread runningThread = null;
 	protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
 	protected int nbrClients;
+	public ArrayList<WorkerRunnable> clientList;
 
 	public ThreadPooledServer(int port) {
 		this.serverPort = port;
+		clientList = new ArrayList<WorkerRunnable>();
 	}
 
 	public static void main(String[] args) throws FileNotFoundException {
 		ThreadPooledServer server = new ThreadPooledServer(4444);
 		new Thread(server).start();
 
-//		try {
-//			Thread.sleep(20 * 1000);
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
-//		}
-//		System.out.println("ThreadPooledServer: Stopping Server");
-//		server.stop();
+		//QUESTION: This bit that I commented out, should I have it or not..?
+		
+		// try {
+		// Thread.sleep(20 * 1000);
+		// } catch (InterruptedException e) {
+		// e.printStackTrace();
+		// }
+		// System.out.println("ThreadPooledServer: Stopping Server");
+		// server.stop();
 	}
 
 	public void run() {
@@ -53,23 +58,24 @@ public class ThreadPooledServer implements Runnable {
 				}
 				throw new RuntimeException("ThreadPooledServer: Error accepting client connection", e);
 			}
-			boolean canConnect = (nbrClients < 1 ? true : false);
+
+			boolean canConnect = (clientList.size() < 1 ? true : false);
 			if (canConnect) {
-				nbrClients = 1;
-				this.threadPool.execute(new WorkerRunnable(clientSocket, "Thread Pooled Server"));
+				WorkerRunnable runnable = new WorkerRunnable(this, clientSocket, "Thread Pooled Server");
+				this.threadPool.execute(runnable);
 			} else {
 				try {
-
 					ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
-					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect"});
-					System.out.println("New client can't connect");
-
+					objectOut.writeObject(new Object[] { "Server is BUSY, can't connect" });
 				} catch (IOException e) {
 					e.printStackTrace();
 				}
 			}
+
 		}
+
 		this.threadPool.shutdown();
+
 		System.out.println("ThreadPooledServer run() method: Server Stopped.");
 	}
 
@@ -90,8 +96,16 @@ public class ThreadPooledServer implements Runnable {
 		try {
 			this.serverSocket = new ServerSocket(this.serverPort);
 		} catch (IOException e) {
-			throw new RuntimeException("ThreadPooledServer:Cannot open port 4444", e);
+			throw new RuntimeException("ThreadPooledServer: Cannot open port 4444", e);
 		}
 	}
 
+	public void addClient(WorkerRunnable client) {
+		clientList.add(client);
+	}
+
+	public void disconnectClient(WorkerRunnable client) {
+		clientList.remove(client);
+
+	}
 }

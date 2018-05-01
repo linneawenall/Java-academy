@@ -48,6 +48,7 @@ public class PanelClient implements ActionListener {
 	private static Command fromUser;
 	private Object[] fromServer;
 	private String[] array;
+	protected int nbrClients;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 
@@ -62,12 +63,14 @@ public class PanelClient implements ActionListener {
 					@Override
 					public void windowClosing(WindowEvent e) {
 						fromUser = new Command("disconnect", null);
-						try {
-							out.writeObject(fromUser);
-						} catch (IOException e1) {
-							e1.printStackTrace();
+						if (!clientSocket.isClosed()) {
+							try {
+								out.writeObject(fromUser);
+							} catch (IOException e1) {
+								e1.printStackTrace();
+							}
+							e.getWindow().dispose();
 						}
-						e.getWindow().dispose();
 					}
 				});
 
@@ -103,11 +106,7 @@ public class PanelClient implements ActionListener {
 
 			in = new ObjectInputStream(clientSocket.getInputStream());
 
-			// Start here! Not working to update the second panel with "Server is BUSY"
-			// executeOnServer(new Command("", null));
-			// if ((fromServer = (Object[]) in.readObject()) == null) {
-			// logArea.append(fromServer[0].toString());
-			// }
+			executeOnServer(new Command("Can client connect?", null));
 
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
@@ -148,18 +147,29 @@ public class PanelClient implements ActionListener {
 
 	public void executeOnServer(Command command) {
 
-		try {
-			out.writeObject(fromUser);
-			fromServer = (Object[]) in.readObject();
-			updateGUI(fromServer);
+		if (!clientSocket.isClosed()) {
+			try {
+				out.writeObject(command);
+				fromServer = (Object[]) in.readObject();
 
-			if (fromUser.getName().equals("startRamp")) {
-				CurrentValueFinder cvf = new CurrentValueFinder();
-				cvf.execute();
+				if (fromServer.length == 1) {
+					logArea.append((String) fromServer[0]);
+					clientSocket.close();
+				} else {
+					updateGUI(fromServer);
+					if (!isConnected) {
+						clientSocket.close();
+					}
+				}
+
+				if (command.getName().equals("startRamp")) {
+					CurrentValueFinder cvf = new CurrentValueFinder();
+					cvf.execute();
+				}
+
+			} catch (ClassNotFoundException | IOException e) {
+				e.printStackTrace();
 			}
-
-		} catch (ClassNotFoundException | IOException e) {
-			e.printStackTrace();
 		}
 	}
 
@@ -309,7 +319,6 @@ public class PanelClient implements ActionListener {
 		timeText = new JTextField(20);
 		timeText.setBorder(BorderFactory.createLineBorder(Color.BLACK));
 		timeText.setBounds(10, 220, 120, 25);
-		// timeText.addActionListener(this);
 		return timeText;
 	}
 
@@ -374,7 +383,7 @@ public class PanelClient implements ActionListener {
 			currentLabel.setText((String) fromServer[0]);
 		}
 		if ((String) fromServer[1] != null) {
-			// System.out.println((String) fromServer[1]);
+			System.out.println("logUpdate " + (String) fromServer[1]);
 			logArea.append((String) fromServer[1] + "\n");
 		}
 		deviceLabel.setIcon(whichIcon((boolean) fromServer[2]));
