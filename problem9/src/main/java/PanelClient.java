@@ -107,8 +107,10 @@ public class PanelClient implements ActionListener {
 
 			in = new ObjectInputStream(clientSocket.getInputStream());
 
-			executeOnServer(new Command("Can client connect?", null));
-
+			fromServer = (Object[]) in.readObject();
+			if (fromServer != null) {
+				updateGUI(fromServer);
+			}
 		} catch (UnknownHostException e) {
 			System.err.println("Don't know about host localhost ");
 			System.exit(1);
@@ -376,8 +378,6 @@ public class PanelClient implements ActionListener {
 	}
 
 	public void updateGUI(Object[] fromServer) {
-		// System.out.println("Updating GUI");
-		// System.out.println("Currentvalue is " + (String) fromServer[0]);
 		if ((String) fromServer[0] != null) {
 			currentValue = (String) fromServer[0];
 			currentLabel.setText((String) fromServer[0]);

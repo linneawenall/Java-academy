@@ -31,6 +31,7 @@ public class WorkerRunnable implements Runnable {
 		try {
 			ObjectInputStream objectIn = new ObjectInputStream(clientSocket.getInputStream());
 			ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+			objectOut.writeObject(changes);
 
 			while (isConnected) {
 				Command inputCommand = (Command) objectIn.readObject();
@@ -56,7 +57,7 @@ public class WorkerRunnable implements Runnable {
 			isConnected = false;
 
 		} else if (input.getName().equals("Can client connect?")) {
-			
+
 		} else {
 			try {
 				System.out.println("Executing command " + input.getName());
