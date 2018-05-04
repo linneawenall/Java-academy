@@ -49,6 +49,7 @@ public class PanelClient implements ActionListener {
 	private Object[] fromServer;
 	private String[] array;
 	protected int nbrClients;
+	private String currentValue;
 
 	public static void main(String[] args) throws FileNotFoundException, ClassNotFoundException {
 
@@ -170,15 +171,13 @@ public class PanelClient implements ActionListener {
 	private class CurrentValueFinder extends SwingWorker<Void, Void> {
 		@Override
 		protected Void doInBackground() throws Exception {
-            // REVIEW (medium): there is a better way of checking if the ramping has finished.
-            // For example, the ramping is finished, when the value doesn't change anymore. So what you could do is
-            // compare the old current value with the new one. If they are different, the ramping is still in-progress.
-            // Of course, you would have to select a proper sleep value, so you won't read the value from the server
-            // twice before it actually changes. But since you know the ramping interval, it shouldn't be too difficult
-            // to calculate this sleep interval.
-			for (int i = 0; i <= array.length - 1; i++) {
-				out.writeObject(new Command("ramping", null));
+			while (true) {
+				out.writeObject(new Command("current_get", null));
 				fromServer = (Object[]) in.readObject();
+				if (currentValue.equals((String) fromServer[0])) {
+					logArea.append("Ramping completed \n");
+					break;
+				}
 				updateGUI(fromServer);
 				Thread.sleep(Integer.parseInt(timeText.getText()));
 			}
@@ -380,6 +379,7 @@ public class PanelClient implements ActionListener {
 		// System.out.println("Updating GUI");
 		// System.out.println("Currentvalue is " + (String) fromServer[0]);
 		if ((String) fromServer[0] != null) {
+			currentValue = (String) fromServer[0];
 			currentLabel.setText((String) fromServer[0]);
 		}
 		if ((String) fromServer[1] != null) {

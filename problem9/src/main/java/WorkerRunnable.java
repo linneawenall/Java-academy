@@ -8,10 +8,7 @@ public class WorkerRunnable implements Runnable {
 
 	// Server
 	protected Socket clientSocket;
-	// REVIEW (medium): this variable is not needed anywhere.
-	protected String serverText;
 	private ThreadPooledServer server;
-	private boolean canConnect;
 
 	private DeviceNarrow device;
 
@@ -21,17 +18,13 @@ public class WorkerRunnable implements Runnable {
 
 	private boolean isConnected;
 
-	public WorkerRunnable(ThreadPooledServer server, boolean canConnect, Socket clientSocket, String serverText) {
+	public WorkerRunnable(ThreadPooledServer server, Socket clientSocket) {
 		this.clientSocket = clientSocket;
-		this.serverText = serverText;
 		this.server = server;
-		this.canConnect = canConnect;
 
 		device = new NarrowRampedPowerSupplyImpl(new RampedPowerSupplyImpl());
 		isConnected = true;
-		if (canConnect) {
-			server.addClient(this);
-		}
+		server.addClient(this);
 	}
 
 	public void run() {
@@ -61,19 +54,9 @@ public class WorkerRunnable implements Runnable {
 		if (input.getName().equals("disconnect")) {
 			System.out.println("Client is disconnected from server");
 			isConnected = false;
-		} else if (input.getName().equals("ramping")) {
-			// REVIEW (medium): what is the purpose of this command? Do you use it for checking if the ramping is finished?
-			// If so, check the review comment there: there is a better way of checking if the ramping is finished
-			// rather than introducing a special command to do that.
-			if (!device.isRamping()) {
-				logUpdate = "Ramping completed";
-			}
+
 		} else if (input.getName().equals("Can client connect?")) {
-			// REVIEW (medium): this command is not requested by the assignment. remove it.
-			if (!canConnect) {
-				logUpdate = "Server is BUSY, can't connect";
-				isConnected = false;
-			}
+			
 		} else {
 			try {
 				System.out.println("Executing command " + input.getName());

@@ -36,9 +36,6 @@ public class ThreadPooledServer implements Runnable {
 		// }
 		// System.out.println("ThreadPooledServer: Stopping Server");
 		// server.stop();
-
-		// REVIEW (high): you can remove the commented-out code, however you still need to wait for the
-		// newly created thread to finish. You can do this by using "Thread.join()" method.
 	}
 
 	public void run() {
@@ -62,10 +59,17 @@ public class ThreadPooledServer implements Runnable {
 			}
 
 			boolean canConnect = (clientList.size() < 1 ? true : false);
-			// REVIEW (medium): you don't have to pass the "canConnect" parameter to "WorkRunnable", the
-			// "ThreadPooledServer" can send the message to the client if somebody else is already connected to it.
-			WorkerRunnable runnable = new WorkerRunnable(this, canConnect, clientSocket, "Thread Pooled Server");
-			this.threadPool.execute(runnable);
+			if (canConnect) {
+				WorkerRunnable runnable = new WorkerRunnable(this, clientSocket);
+				this.threadPool.execute(runnable);
+			} else {
+				try {
+					ObjectOutputStream objectOut = new ObjectOutputStream(clientSocket.getOutputStream());
+					objectOut.writeObject(new Object[] { "", "Server is BUSY, can't connect", false, false, false });
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+			}
 
 		}
 
