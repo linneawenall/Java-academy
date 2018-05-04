@@ -17,7 +17,6 @@ public class ThreadPooledServer implements Runnable {
 	protected ExecutorService threadPool = Executors.newFixedThreadPool(10);
 	protected int nbrClients;
 	public ArrayList<WorkerRunnable> clientList;
-	private Thread threadRunner;
 
 	public ThreadPooledServer(int port) {
 		this.serverPort = port;
@@ -27,6 +26,14 @@ public class ThreadPooledServer implements Runnable {
 	public static void main(String[] args) throws FileNotFoundException {
 		ThreadPooledServer server = new ThreadPooledServer(4444);
 		new Thread(server).start();
+		
+		try {
+			Thread.currentThread().join();
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		System.out.println("ThreadPooledServer: Stopping Server");
+		server.stop();
 	}
 
 	public void run() {
@@ -52,8 +59,7 @@ public class ThreadPooledServer implements Runnable {
 			boolean canConnect = (clientList.size() < 1 ? true : false);
 			if (canConnect) {
 				WorkerRunnable runnable = new WorkerRunnable(this, clientSocket);
-				threadRunner = new Thread(runnable);
-				this.threadPool.execute(threadRunner);
+				this.threadPool.execute(runnable);
 
 			} else {
 				try {
@@ -67,14 +73,7 @@ public class ThreadPooledServer implements Runnable {
 		}
 		this.threadPool.shutdown();
 
-		// REVIEW (high): the "Thread.join" should be moved to the "main" method. Here it is of little use.
-		try {
-			threadRunner.join();
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		System.out.println("ThreadPooledServer: Stopping Server");
-		this.stop();
+		
 	}
 
 	private synchronized boolean isStopped() {
