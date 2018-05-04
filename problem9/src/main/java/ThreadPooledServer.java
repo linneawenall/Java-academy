@@ -67,6 +67,7 @@ public class ThreadPooledServer implements Runnable {
 		}
 		this.threadPool.shutdown();
 
+		// REVIEW (high): the "Thread.join" should be moved to the "main" method. Here it is of little use.
 		try {
 			threadRunner.join();
 		} catch (InterruptedException e) {
