@@ -55,9 +55,6 @@ public class WorkerRunnable implements Runnable {
 		if (input.getName().equals("disconnect")) {
 			System.out.println("Client is disconnected from server");
 			isConnected = false;
-
-		} else if (input.getName().equals("Can client connect?")) {
-
 		} else {
 			try {
 				System.out.println("Executing command " + input.getName());

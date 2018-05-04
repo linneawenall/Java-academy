@@ -74,8 +74,6 @@ public class ThreadPooledServer implements Runnable {
 		}
 		System.out.println("ThreadPooledServer: Stopping Server");
 		this.stop();
-
-		System.out.println("ThreadPooledServer run() method: Server Stopped.");
 	}
 
 	private synchronized boolean isStopped() {
