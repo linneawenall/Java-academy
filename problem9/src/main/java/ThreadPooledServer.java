@@ -25,24 +25,13 @@ public class ThreadPooledServer implements Runnable {
 
 	public static void main(String[] args) throws FileNotFoundException {
 		ThreadPooledServer server = new ThreadPooledServer(4444);
-		new Thread(server).start();
-		
+		Thread serverThread = new Thread(server);
+		serverThread.start();
 		try {
-			// REVIEW (high): this won't wait for the ThreadPooledServer to finish, but rather the main thread.
-			// The proper way to do it is:
-			// Thread serverThread = new Thread(server).start();
-			// ...
-			// serverThread.join();
-			// ...
-			Thread.currentThread().join();
+			serverThread.join();
 		} catch (InterruptedException e) {
 			e.printStackTrace();
 		}
-		// REVIEW (medium): the lines below are never reached, so you might as well remove them.
-		// You can remove the "stop" method as well.
-		// In general there is no problem in this server running indefinitely.
-		System.out.println("ThreadPooledServer: Stopping Server");
-		server.stop();
 	}
 
 	public void run() {
@@ -82,20 +71,10 @@ public class ThreadPooledServer implements Runnable {
 		}
 		this.threadPool.shutdown();
 
-		
 	}
 
 	private synchronized boolean isStopped() {
 		return this.isStopped;
-	}
-
-	public synchronized void stop() {
-		this.isStopped = true;
-		try {
-			this.serverSocket.close();
-		} catch (IOException e) {
-			throw new RuntimeException("ThreadPooledServer: Error closing server", e);
-		}
 	}
 
 	private void openServerSocket() {
